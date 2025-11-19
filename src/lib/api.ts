@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8080/api";
-const CATEGORYAPI_BASE_URL = "http://localhost:8081/api";
+const API_BASE_URL = "https://expensesapi-8mfd.onrender.com/api";
+const CATEGORYAPI_BASE_URL = "https://expensesapi-8mfd.onrender.com/api";
 
 export const expenseapi = axios.create({
   baseURL: API_BASE_URL,
