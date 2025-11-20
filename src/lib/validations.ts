@@ -16,6 +16,7 @@ export const categorySchema = z.object({
   type: z.string().refine((v) => v === "fixed" || v === "variable", {
     message: "Type must be 'fixed' or 'variable'",
   }),
+  month: z.string().min(1, "Month is required"), // NEW FIELD
 });
 
 export type ExpenseFormData = z.infer<typeof expenseSchema>;

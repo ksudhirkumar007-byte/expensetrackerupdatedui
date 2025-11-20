@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Expense, Category } from "@/types/expense";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Expense, Category } from "../../types/expense";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { BarChart3, PieChart, TrendingUp, Calendar } from "lucide-react";
 import {
   Select,
@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "../../components/ui/select";
 
 interface AnalyticsProps {
   expenses: Expense[];
