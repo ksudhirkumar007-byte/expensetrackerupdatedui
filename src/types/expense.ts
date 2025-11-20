@@ -4,6 +4,7 @@ export interface Category {
   budget: number;
   type: "fixed" | "variable";
   icon?: string;
+  month?: string;
 }
 
 export interface Expense {
