@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { expenseApi } from "src/lib/api";
-import { Expense } from "src/types/expense";
+import { expenseApi } from "../lib/api";
+import { Expense } from "../types/expense";
 import { toast } from "sonner";
 
 export function useExpenses() {

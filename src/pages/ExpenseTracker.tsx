@@ -1,46 +1,36 @@
 import { useState, useMemo } from "react";
-import { useExpenses } from "src/hooks/use-expenses";
-import { useCategories } from "src/hooks/use-categories";
-import { ExpenseStats } from "src/components/expense/ExpenseStats";
-import { BudgetProgress } from "src/components/expense/BudgetProgress";
-import { ExpenseFilters } from "src/components/expense/ExpenseFilters";
-import { ExpenseList } from "src/components/expense/ExpenseList";
-import { AddExpenseForm } from "src/components/expense/AddExpenseForm";
-import { CategoryManager } from "src/components/expense/CategoryManager";
-import { Analytics } from "src/components/expense/Analytics";
-import { Button } from "src/components/ui/button";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "src/components/ui/tabs";
+import { useExpenses } from "../hooks/use-expenses";
+import { useCategories } from "../hooks/use-categories";
+import { ExpenseStats } from "../components/expense/ExpenseStats";
+import { BudgetProgress } from "../components/expense/BudgetProgress";
+import { ExpenseFilters } from "../components/expense/ExpenseFilters";
+import { ExpenseList } from "../components/expense/ExpenseList";
+import { AddExpenseForm } from "../components/expense/AddExpenseForm";
+import { CategoryManager } from "../components/expense/CategoryManager";
+import { CategoryList } from "../components/expense/CategoryList";
+import { Analytics } from "../components/expense/Analytics";
+import { Button } from "../components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { PlusCircle, Loader2 } from "lucide-react";
-import { CategoryStats } from "src/types/expense";
+import { CategoryStats } from "../types/expense";
 
 export default function ExpenseTracker() {
-  const {
-    expenses,
-    isLoading: expensesLoading,
-    addExpense,
-    deleteExpense,
-    isAdding,
-  } = useExpenses();
+  const { expenses, isLoading: expensesLoading, addExpense, deleteExpense, isAdding } = useExpenses();
   const {
     categories,
     isLoading: categoriesLoading,
     addCategory,
+    deleteCategory,
+    updateCategory,
+    bulkUpdateMonth,
+    isBulkUpdating,
   } = useCategories();
-
+  
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedType, setSelectedType] = useState<
-    "all" | "fixed" | "variable"
-  >("all");
-  const [dateRange, setDateRange] = useState<{
-    start: Date | undefined;
-    end: Date | undefined;
-  }>({
+  const [selectedType, setSelectedType] = useState<"all" | "fixed" | "variable">("all");
+  const [categoryType, setCategoryType] = useState<"all" | "fixed" | "variable">("all");
+  const [dateRange, setDateRange] = useState<{ start: Date | undefined; end: Date | undefined }>({
     start: undefined,
     end: undefined,
   });
@@ -51,9 +41,8 @@ export default function ExpenseTracker() {
       if (!cat) return false;
 
       const matchesType = selectedType === "all" || cat.type === selectedType;
-      const matchesCategory =
-        selectedCategory === "all" || cat.id.toString() === selectedCategory;
-
+      const matchesCategory = selectedCategory === "all" || cat.id.toString() === selectedCategory;
+      
       let matchesDate = true;
       if (dateRange.start) {
         const expDate = new Date(exp.date);
@@ -79,12 +68,8 @@ export default function ExpenseTracker() {
   }, [categories, expenses]);
 
   const totalBudget = categories.reduce((sum, cat) => sum + cat.budget, 0);
-  const totalExpenses = filteredExpenses.reduce(
-    (sum, exp) => sum + exp.amount,
-    0
-  );
-  const budgetRemaining =
-    totalBudget - expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const totalExpenses = filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const budgetRemaining = totalBudget - expenses.reduce((sum, exp) => sum + exp.amount, 0);
   const uniqueDays = new Set(filteredExpenses.map((e) => e.date)).size;
   const avgDaily = uniqueDays > 0 ? totalExpenses / uniqueDays : 0;
 
@@ -106,12 +91,8 @@ export default function ExpenseTracker() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-foreground">
-              Expense Tracker
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Manage your spending and budgets
-            </p>
+            <h1 className="text-4xl font-bold text-foreground">Expense Tracker</h1>
+            <p className="text-muted-foreground mt-2">Manage your spending and budgets</p>
           </div>
           <CategoryManager onAddCategory={addCategory} />
         </div>
@@ -128,11 +109,12 @@ export default function ExpenseTracker() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2">
             <Tabs defaultValue="expenses" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="expenses">Expenses</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                <TabsTrigger value="categories">Categories</TabsTrigger>
               </TabsList>
-
+              
               <TabsContent value="expenses" className="space-y-6 mt-6">
                 <ExpenseFilters
                   categories={categories}
@@ -145,10 +127,7 @@ export default function ExpenseTracker() {
                 />
 
                 {!showAddForm && (
-                  <Button
-                    onClick={() => setShowAddForm(true)}
-                    className="w-full"
-                  >
+                  <Button onClick={() => setShowAddForm(true)} className="w-full">
                     <PlusCircle className="h-4 w-4 mr-2" />
                     Add New Expense
                   </Button>
@@ -171,16 +150,29 @@ export default function ExpenseTracker() {
               </TabsContent>
 
               <TabsContent value="analytics" className="mt-6">
-                <Analytics
-                  expenses={filteredExpenses}
-                  categories={categories}
-                />
+                <Analytics expenses={filteredExpenses} categories={categories} />
+              </TabsContent>
+
+              <TabsContent value="categories" className="mt-6">
+            <CategoryList
+              categories={categories}
+              onDeleteCategory={deleteCategory}
+              onUpdateCategory={updateCategory}
+              onBulkUpdateMonth={bulkUpdateMonth}
+              isBulkUpdating={isBulkUpdating}
+              selectedType={categoryType}
+              onTypeChange={setCategoryType}
+            />
               </TabsContent>
             </Tabs>
           </div>
 
           <div>
-            <BudgetProgress stats={categoryStats} />
+            <BudgetProgress 
+              stats={categoryStats} 
+              selectedType={categoryType}
+              onTypeChange={setCategoryType}
+            />
           </div>
         </div>
       </div>

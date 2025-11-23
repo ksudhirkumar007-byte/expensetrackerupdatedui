@@ -1,6 +1,6 @@
-import { Expense, Category } from "src/types/expense";
-import { Card, CardContent } from "src/components/ui/card";
-import { Button } from "src/components/ui/button";
+import { Expense, Category } from "../../types/expense";
+import { Card, CardContent } from "../ui/card";
+import { Button } from "../ui/button";
 import { Trash2, Calendar, Tag } from "lucide-react";
 import { format } from "date-fns";
 import {
@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "src/components/ui/alert-dialog";
+} from "../ui/alert-dialog";
 
 interface ExpenseCardProps {
   expense: Expense;
@@ -43,7 +43,7 @@ export function ExpenseCard({ expense, category, onDelete }: ExpenseCardProps) {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xl font-bold text-foreground whitespace-nowrap">
-              ${expense.amount.toFixed(2)}
+              ₹{expense.amount.toFixed(2)}
             </span>
             <AlertDialog>
               <AlertDialogTrigger asChild>

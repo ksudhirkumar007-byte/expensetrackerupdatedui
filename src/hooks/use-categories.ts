@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { categoryApi } from "src/lib/api";
-import { Category } from "src/types/expense";
+import { categoryApi } from "../lib/api";
+import { Category } from "../types/expense";
 import { toast } from "sonner";
 
 export function useCategories() {
@@ -51,7 +51,16 @@ export function useCategories() {
       toast.error("Failed to update category");
     },
   });
-
+const bulkUpdateMonthMutation = useMutation({
+    mutationFn: categoryApi.bulkUpdateMonth,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      toast.success("All categories updated successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update categories");
+    },
+  });
   return {
     categories,
     isLoading,
@@ -59,6 +68,8 @@ export function useCategories() {
     addCategory: createMutation.mutate,
     deleteCategory: deleteMutation.mutate,
     updateCategory: updateMutation.mutate,
+    bulkUpdateMonth: bulkUpdateMonthMutation.mutate,
     isAdding: createMutation.isPending,
+    isBulkUpdating: bulkUpdateMonthMutation.isPending,
   };
 }

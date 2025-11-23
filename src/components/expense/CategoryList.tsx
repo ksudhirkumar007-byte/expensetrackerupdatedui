@@ -1,6 +1,6 @@
 import { Category } from "../../types/expense";
-import { Button } from "../../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import {
   Table,
   TableBody,
@@ -8,7 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../components/ui/table";
+} from "../ui/table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,15 +19,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "../../components/ui/alert-dialog";
-import { Badge } from "../../components/ui/badge";
+} from "../ui/alert-dialog";
+import { Badge } from "../ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../components/ui/select";
+} from "../ui/select";
 import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { CategoryManager } from "./CategoryManager";
@@ -38,6 +38,8 @@ interface CategoryListProps {
   onUpdateCategory: (args: { id: number; data: any }) => void;
   onBulkUpdateMonth: (month: string) => void;
   isBulkUpdating: boolean;
+  selectedType?: "all" | "fixed" | "variable";
+  onTypeChange?: (type: "all" | "fixed" | "variable") => void;
 }
 
 export function CategoryList({
@@ -46,9 +48,15 @@ export function CategoryList({
   onUpdateCategory,
   onBulkUpdateMonth,
   isBulkUpdating,
+  selectedType = "all",
+  onTypeChange,
 }: CategoryListProps) {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string>("");
+
+  const filteredCategories = categories.filter((cat) => 
+    selectedType === "all" || cat.type === selectedType
+  );
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -66,7 +74,21 @@ export function CategoryList({
      
       <Card>
         <CardHeader>
-          <CardTitle>Categories</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>Categories</CardTitle>
+            {onTypeChange && (
+              <Select value={selectedType} onValueChange={onTypeChange}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="fixed">Fixed</SelectItem>
+                  <SelectItem value="variable">Variable</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
@@ -79,14 +101,14 @@ export function CategoryList({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {categories.length === 0 ? (
+              {filteredCategories.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center text-muted-foreground">
-                    No categories yet. Add one to get started!
+                    {categories.length === 0 ? "No categories yet. Add one to get started!" : "No categories match the selected filter."}
                   </TableCell>
                 </TableRow>
               ) : (
-                categories.map((category) => (
+                filteredCategories.map((category) => (
                   <TableRow key={category.id}>
                     <TableCell className="font-medium">{category.name}</TableCell>
                     <TableCell>
@@ -94,7 +116,7 @@ export function CategoryList({
                         {category.type}
                       </Badge>
                     </TableCell>
-                    <TableCell>${category.budget.toFixed(2)}</TableCell>
+                    <TableCell>₹{category.budget.toFixed(2)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button

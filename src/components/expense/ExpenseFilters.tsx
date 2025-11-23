@@ -1,5 +1,5 @@
-import { Category } from "src/types/expense";
-import { Button } from "src/components/ui/button";
+import { Category } from "../../types/expense";
+import { Button } from "../ui/button";
 import { Calendar } from "lucide-react";
 import {
   Select,
@@ -7,15 +7,15 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "src/components/ui/select";
+} from "../ui/select";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "src/components/ui/popover";
-import { Calendar as CalendarComponent } from "src/components/ui/calendar";
+} from "../ui/popover";
+import { Calendar as CalendarComponent } from "../ui/calendar";
 import { format } from "date-fns";
-import { cn } from "src/lib/utils";
+import { cn } from "../../lib/utils";
 
 interface ExpenseFiltersProps {
   categories: Category[];

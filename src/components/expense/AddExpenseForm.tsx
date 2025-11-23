@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Category } from "src/types/expense";
-import { expenseSchema, ExpenseFormData } from "src/lib/validations";
+import { Category } from "../../types/expense";
+import { expenseSchema, ExpenseFormData } from "../../lib/validations";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "src/components/ui/card";
-import { Button } from "src/components/ui/button";
-import { Input } from "src/components/ui/input";
-import { Textarea } from "src/components/ui/textarea";
+} from "../ui/card";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 import {
   Form,
   FormControl,
@@ -19,14 +19,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "src/components/ui/form";
+} from "../ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "src/components/ui/select";
+} from "../ui/select";
 import { X } from "lucide-react";
 
 interface AddExpenseFormProps {

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Expense, Category } from "../../types/expense";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { BarChart3, PieChart, TrendingUp, Calendar } from "lucide-react";
 import {
   Select,
@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../components/ui/select";
+} from "../ui/select";
 
 interface AnalyticsProps {
   expenses: Expense[];
@@ -121,7 +121,7 @@ export function Analytics({ expenses, categories }: AnalyticsProps) {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${analytics.avgDaily.toFixed(2)}</div>
+            <div className="text-2xl font-bold">₹{analytics.avgDaily.toFixed(2)}</div>
           </CardContent>
         </Card>
 
@@ -131,7 +131,7 @@ export function Analytics({ expenses, categories }: AnalyticsProps) {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${analytics.highestDay[1].toFixed(2)}</div>
+            <div className="text-2xl font-bold">₹{analytics.highestDay[1].toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">{analytics.highestDay[0]}</p>
           </CardContent>
         </Card>
@@ -147,7 +147,7 @@ export function Analytics({ expenses, categories }: AnalyticsProps) {
         <CardContent>
           <div className="flex items-center justify-between">
             <span className="font-semibold">{analytics.topCategory[0]}</span>
-            <span className="text-2xl font-bold">${analytics.topCategory[1].toFixed(2)}</span>
+            <span className="text-2xl font-bold">₹{analytics.topCategory[1].toFixed(2)}</span>
           </div>
         </CardContent>
       </Card>
@@ -167,7 +167,7 @@ export function Analytics({ expenses, categories }: AnalyticsProps) {
               {analytics.dayWise.slice(0, 7).map(([day, amount]) => (
                 <div key={day} className="flex items-center justify-between">
                   <span className="text-sm">{day}</span>
-                  <span className="font-semibold">${amount.toFixed(2)}</span>
+                  <span className="font-semibold">₹{amount.toFixed(2)}</span>
                 </div>
               ))}
             </div>
@@ -190,7 +190,7 @@ export function Analytics({ expenses, categories }: AnalyticsProps) {
                     <div className="h-3 w-3 rounded-full bg-chart-1" />
                     <span className="text-sm">{item.category?.name}</span>
                   </div>
-                  <span className="font-semibold">${item.amount.toFixed(2)}</span>
+                  <span className="font-semibold">₹{item.amount.toFixed(2)}</span>
                 </div>
               ))}
             </div>

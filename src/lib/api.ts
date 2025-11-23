@@ -28,4 +28,5 @@ export const categoryApi = {
   create: (data: any) => categoryapi.post("/categories", data),
   delete: (id: number) => categoryapi.delete(`/categories/${id}`),
   update: (id: number, data: any) => categoryapi.put(`/categories/${id}`, data),
+  bulkUpdateMonth: (month: string) => categoryapi.put("/categories/bulk-update-month", { month }),
 };

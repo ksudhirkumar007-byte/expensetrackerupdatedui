@@ -1,30 +1,57 @@
-import { Category, CategoryStats } from "src/types/expense";
+import { Category, CategoryStats } from "../../types/expense";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "src/components/ui/card";
-import { Progress } from "src/components/ui/progress";
+} from "../ui/card";
+import { Progress } from "../ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
 interface BudgetProgressProps {
   stats: CategoryStats[];
+  selectedType?: "all" | "fixed" | "variable";
+  onTypeChange?: (type: "all" | "fixed" | "variable") => void;
 }
 
-export function BudgetProgress({ stats }: BudgetProgressProps) {
+export function BudgetProgress({ stats, selectedType = "all", onTypeChange }: BudgetProgressProps) {
+  const filteredStats = stats.filter((stat) => 
+    selectedType === "all" || stat.category.type === selectedType
+  );
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Budget Overview</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle>Budget Overview</CardTitle>
+          {onTypeChange && (
+            <Select value={selectedType} onValueChange={onTypeChange}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="fixed">Fixed</SelectItem>
+                <SelectItem value="variable">Variable</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {stats.length === 0 ? (
+        {filteredStats.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">
-            No budget data available
+            {stats.length === 0 ? "No budget data available" : "No categories match the selected filter."}
           </p>
         ) : (
-          stats.map((stat) => {
+          filteredStats.map((stat) => {
             const isOverBudget = stat.percentage > 100;
             const isNearLimit = stat.percentage > 80 && stat.percentage <= 100;
 
@@ -51,7 +78,7 @@ export function BudgetProgress({ stats }: BudgetProgressProps) {
                         : "text-muted-foreground"
                     }`}
                   >
-                    ${stat.spent.toFixed(2)} / $
+                    ₹{stat.spent.toFixed(2)} / ₹
                     {stat.category.budget.toFixed(2)}
                   </span>
                 </div>
@@ -79,7 +106,7 @@ export function BudgetProgress({ stats }: BudgetProgressProps) {
                   </span>
                   {!isOverBudget && (
                     <span className="text-muted-foreground">
-                      ${stat.remaining.toFixed(2)} left
+                      ₹{stat.remaining.toFixed(2)} left
                     </span>
                   )}
                 </div>

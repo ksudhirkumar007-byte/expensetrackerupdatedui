@@ -1,4 +1,4 @@
-import { Expense, Category } from "src/types/expense";
+import { Expense, Category } from "../../types/expense";
 import { ExpenseCard } from "./ExpenseCard";
 import { TrendingDown } from "lucide-react";
 

@@ -4,7 +4,7 @@ import {
   DollarSign,
   ShoppingBag,
 } from "lucide-react";
-import { Card, CardContent } from "src/components/ui/card";
+import { Card, CardContent } from "../ui/card";
 
 interface ExpenseStatsProps {
   totalExpenses: number;
@@ -31,7 +31,7 @@ export function ExpenseStats({
                 Total Spent
               </p>
               <h3 className="text-2xl font-bold text-foreground mt-2">
-                ${totalExpenses.toFixed(2)}
+                ₹{totalExpenses.toFixed(2)}
               </h3>
             </div>
             <div className="h-12 w-12 rounded-full bg-chart-1/10 flex items-center justify-center">
@@ -49,7 +49,7 @@ export function ExpenseStats({
                 Avg. Daily
               </p>
               <h3 className="text-2xl font-bold text-foreground mt-2">
-                ${avgDaily.toFixed(2)}
+                ₹{avgDaily.toFixed(2)}
               </h3>
             </div>
             <div className="h-12 w-12 rounded-full bg-chart-2/10 flex items-center justify-center">
@@ -89,7 +89,7 @@ export function ExpenseStats({
                   isOverBudget ? "text-destructive" : "text-success"
                 }`}
               >
-                ${Math.abs(budgetRemaining).toFixed(2)}
+                ₹{Math.abs(budgetRemaining).toFixed(2)}
               </h3>
             </div>
             <div
