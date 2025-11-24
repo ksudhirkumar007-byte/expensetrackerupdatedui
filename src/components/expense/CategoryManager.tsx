@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Category } from "../../types/expense";
@@ -53,12 +53,25 @@ export function CategoryManager({
 
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
-    defaultValues: initialData || {
+    defaultValues: {
       name: "",
       budget: 0,
       type: "variable",
     },
   });
+
+  // Reset form when initialData changes (for edit mode)
+  useEffect(() => {
+    if (initialData) {
+      form.reset(initialData);
+    } else {
+      form.reset({
+        name: "",
+        budget: 0,
+        type: "variable",
+      });
+    }
+  }, [initialData, form]);
 
   const handleSubmit = (data: CategoryFormData) => {
     onAddCategory(data);

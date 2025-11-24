@@ -38,8 +38,6 @@ interface CategoryListProps {
   onUpdateCategory: (args: { id: number; data: any }) => void;
   onBulkUpdateMonth: (month: string) => void;
   isBulkUpdating: boolean;
-  selectedType?: "all" | "fixed" | "variable";
-  onTypeChange?: (type: "all" | "fixed" | "variable") => void;
 }
 
 export function CategoryList({
@@ -48,15 +46,9 @@ export function CategoryList({
   onUpdateCategory,
   onBulkUpdateMonth,
   isBulkUpdating,
-  selectedType = "all",
-  onTypeChange,
 }: CategoryListProps) {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string>("");
-
-  const filteredCategories = categories.filter((cat) => 
-    selectedType === "all" || cat.type === selectedType
-  );
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -74,21 +66,7 @@ export function CategoryList({
      
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Categories</CardTitle>
-            {onTypeChange && (
-              <Select value={selectedType} onValueChange={onTypeChange}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="fixed">Fixed</SelectItem>
-                  <SelectItem value="variable">Variable</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          </div>
+          <CardTitle>Categories</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -101,14 +79,14 @@ export function CategoryList({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCategories.length === 0 ? (
+              {categories.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center text-muted-foreground">
-                    {categories.length === 0 ? "No categories yet. Add one to get started!" : "No categories match the selected filter."}
+                    No categories yet. Add one to get started!
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredCategories.map((category) => (
+                categories.map((category) => (
                   <TableRow key={category.id}>
                     <TableCell className="font-medium">{category.name}</TableCell>
                     <TableCell>

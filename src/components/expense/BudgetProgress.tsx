@@ -6,52 +6,25 @@ import {
   CardTitle,
 } from "../ui/card";
 import { Progress } from "../ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
 interface BudgetProgressProps {
   stats: CategoryStats[];
-  selectedType?: "all" | "fixed" | "variable";
-  onTypeChange?: (type: "all" | "fixed" | "variable") => void;
 }
 
-export function BudgetProgress({ stats, selectedType = "all", onTypeChange }: BudgetProgressProps) {
-  const filteredStats = stats.filter((stat) => 
-    selectedType === "all" || stat.category.type === selectedType
-  );
-
+export function BudgetProgress({ stats }: BudgetProgressProps) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>Budget Overview</CardTitle>
-          {onTypeChange && (
-            <Select value={selectedType} onValueChange={onTypeChange}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="fixed">Fixed</SelectItem>
-                <SelectItem value="variable">Variable</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-        </div>
+        <CardTitle>Budget Overview</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {filteredStats.length === 0 ? (
+        {stats.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">
-            {stats.length === 0 ? "No budget data available" : "No categories match the selected filter."}
+            No budget data available
           </p>
         ) : (
-          filteredStats.map((stat) => {
+          stats.map((stat) => {
             const isOverBudget = stat.percentage > 100;
             const isNearLimit = stat.percentage > 80 && stat.percentage <= 100;
 
