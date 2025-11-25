@@ -260,7 +260,7 @@ export default function ExpenseTracker() {
           )}
 
           {/* Mobile Home View - Show stats and budget progress when no tab selected */}
-          {!currentTab && (
+           {!currentTab && (
             <div className="space-y-6">
               <div className="space-y-3 mb-4">
                 <Select value={globalExpenseType} onValueChange={(value: "all" | "fixed" | "variable") => setGlobalExpenseType(value)}>
