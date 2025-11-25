@@ -21,13 +21,7 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 import { Badge } from "../ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+
 import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { CategoryManager } from "./CategoryManager";
@@ -36,29 +30,33 @@ interface CategoryListProps {
   categories: Category[];
   onDeleteCategory: (id: number) => void;
   onUpdateCategory: (args: { id: number; data: any }) => void;
-  onBulkUpdateMonth: (month: string) => void;
-  isBulkUpdating: boolean;
+  onSummariseAndUpdateMonth: (month: string) => void;
+  isSummarising: boolean;
 }
 
 export function CategoryList({
   categories,
   onDeleteCategory,
   onUpdateCategory,
-  onBulkUpdateMonth,
-  isBulkUpdating,
+  onSummariseAndUpdateMonth,
+  isSummarising,
 }: CategoryListProps) {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [showSummarise, setShowSummarise] = useState(false);
 
-  const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
+  // Get previous month in format like "Jan-25"
+  const getPreviousMonth = () => {
+    const now = new Date();
+    const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const year = prevMonth.getFullYear().toString().slice(-2);
+    return `${monthNames[prevMonth.getMonth()]}-${year}`;
+  };
 
-  const handleBulkUpdate = () => {
-    if (selectedMonth) {
-      onBulkUpdateMonth(selectedMonth);
-    }
+  const handleSummariseAndUpdate = () => {
+    const previousMonth = getPreviousMonth();
+    onSummariseAndUpdateMonth(previousMonth);
   };
 
   return (
@@ -75,6 +73,7 @@ export function CategoryList({
                 <TableHead>Name</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Budget</TableHead>
+                
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -95,6 +94,7 @@ export function CategoryList({
                       </Badge>
                     </TableCell>
                     <TableCell>₹{category.budget.toFixed(2)}</TableCell>
+                   
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
@@ -137,35 +137,38 @@ export function CategoryList({
           </Table>
         </CardContent>
       </Card>
-         <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Bulk Update Month</CardTitle>
-        </CardHeader>
+      <div className="mb-4">
+        <Button 
+          onClick={() => setShowSummarise(!showSummarise)}
+          variant="outline"
+          className="mb-4"
+        >
+          Summarise
+        </Button>
+        
+        {showSummarise && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Summarise & Update Previous Month</CardTitle>
+            </CardHeader>
         <CardContent>
-          <div className="flex gap-4 items-end">
+          <div className="flex gap-4 items-center">
             <div className="flex-1">
-              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select month" />
-                </SelectTrigger>
-                <SelectContent>
-                  {months.map((month) => (
-                    <SelectItem key={month} value={month}>
-                      {month}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <p className="text-sm text-muted-foreground">
+                Will summarise categories and update month to: <strong>{getPreviousMonth()}</strong>
+              </p>
             </div>
             <Button 
-              onClick={handleBulkUpdate} 
-              disabled={!selectedMonth || isBulkUpdating}
+              onClick={handleSummariseAndUpdate} 
+              disabled={isSummarising}
             >
-              {isBulkUpdating ? "Updating..." : "Update All Categories"}
+              {isSummarising ? "Processing..." : "Summarise & Update"}
             </Button>
           </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        )}
+      </div>
       {editingCategory && (
         <CategoryManager
           onAddCategory={(data) => {

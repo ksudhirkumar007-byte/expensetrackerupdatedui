@@ -17,7 +17,10 @@ export const categoryapi = axios.create({
 });
 
 export const expenseApi = {
-  getAll: () => expenseapi.get("/expenses"),
+  getAll: (month?: string) => {
+   
+    return expenseapi.get(`/expenses/${month}`);
+  },
   create: (data: any) => expenseapi.post("/expenses", data),
   delete: (id: number) => expenseapi.delete(`/expenses/${id}`),
   update: (id: number, data: any) => expenseapi.put(`/expenses/${id}`, data),
@@ -29,4 +32,5 @@ export const categoryApi = {
   delete: (id: number) => categoryapi.delete(`/categories/${id}`),
   update: (id: number, data: any) => categoryapi.put(`/categories/${id}`, data),
   bulkUpdateMonth: (month: string) => categoryapi.put("/categories/bulk-update-month", { month }),
+  summariseMonth: (month: string) => categoryapi.post("/categories/summarise-categories", { month }),
 };

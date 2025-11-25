@@ -3,7 +3,7 @@ import { expenseApi } from "../lib/api";
 import { Expense } from "../types/expense";
 import { toast } from "sonner";
 
-export function useExpenses() {
+export function useExpenses(month?: string) {
   const queryClient = useQueryClient();
 
   const {
@@ -11,9 +11,9 @@ export function useExpenses() {
     isLoading,
     error,
   } = useQuery<Expense[]>({
-    queryKey: ["expenses"],
+    queryKey: ["expenses", month],
     queryFn: async () => {
-      const { data } = await expenseApi.getAll();
+      const { data } = await expenseApi.getAll(month);
       return data;
     },
   });

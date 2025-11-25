@@ -22,25 +22,31 @@ import { PlusCircle, Loader2 } from "lucide-react";
 import { CategoryStats } from "../types/expense";
 
 export default function ExpenseTracker() {
-  const { expenses, isLoading: expensesLoading, addExpense, deleteExpense, isAdding } = useExpenses();
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+     const month = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const year = month.getFullYear().toString().slice(-2);
+    return `${monthNames[month.getMonth()]}-${year}`;
+  });
+
+  const { expenses, isLoading: expensesLoading, addExpense, deleteExpense, isAdding } = useExpenses(selectedMonth);
   const {
     categories,
     isLoading: categoriesLoading,
     addCategory,
     deleteCategory,
     updateCategory,
-    bulkUpdateMonth,
-    isBulkUpdating,
+    summariseAndUpdateMonth,
+    isSummarising,
   } = useCategories();
   
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedType, setSelectedType] = useState<"all" | "fixed" | "variable">("all");
   const [globalExpenseType, setGlobalExpenseType] = useState<"all" | "fixed" | "variable">("all");
-  const [dateRange, setDateRange] = useState<{ start: Date | undefined; end: Date | undefined }>({
-    start: undefined,
-    end: undefined,
-  });
 
   const globalFilteredCategories = useMemo(() => {
     return categories.filter((cat) => 
@@ -56,19 +62,10 @@ export default function ExpenseTracker() {
       const matchesGlobalType = globalExpenseType === "all" || cat.type === globalExpenseType;
       const matchesType = selectedType === "all" || cat.type === selectedType;
       const matchesCategory = selectedCategory === "all" || cat.id.toString() === selectedCategory;
-      
-      let matchesDate = true;
-      if (dateRange.start) {
-        const expDate = new Date(exp.date);
-        matchesDate = expDate >= dateRange.start;
-        if (dateRange.end) {
-          matchesDate = matchesDate && expDate <= dateRange.end;
-        }
-      }
 
-      return matchesGlobalType && matchesType && matchesCategory && matchesDate;
+      return matchesGlobalType && matchesType && matchesCategory;
     });
-  }, [expenses, categories, selectedCategory, selectedType, dateRange, globalExpenseType]);
+  }, [expenses, categories, selectedCategory, selectedType, globalExpenseType]);
 
   const categoryStats: CategoryStats[] = useMemo(() => {
     return globalFilteredCategories.map((cat) => {
@@ -152,10 +149,10 @@ export default function ExpenseTracker() {
                   categories={globalFilteredCategories}
                   selectedCategory={selectedCategory}
                   selectedType={selectedType}
-                  dateRange={dateRange}
+                  selectedMonth={selectedMonth}
                   onCategoryChange={setSelectedCategory}
                   onTypeChange={setSelectedType}
-                  onDateRangeChange={setDateRange}
+                  onMonthChange={setSelectedMonth}
                 />
 
                 {!showAddForm && (
@@ -190,8 +187,8 @@ export default function ExpenseTracker() {
               categories={globalFilteredCategories}
               onDeleteCategory={deleteCategory}
               onUpdateCategory={updateCategory}
-              onBulkUpdateMonth={bulkUpdateMonth}
-              isBulkUpdating={isBulkUpdating}
+              onSummariseAndUpdateMonth={summariseAndUpdateMonth}
+              isSummarising={isSummarising}
             />
               </TabsContent>
             </Tabs>

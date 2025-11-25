@@ -13,6 +13,7 @@ export interface Expense {
   category_id: number;
   description: string;
   date: string;
+  month: string
 }
 
 export interface CategoryStats {

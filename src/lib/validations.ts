@@ -8,6 +8,7 @@ export const expenseSchema = z.object({
     .min(1, "Description is required")
     .max(200, "Description too long"),
   date: z.string().min(1, "Date is required"),
+  month: z.string().min(1, "Month is required"),
 });
 
 export const categorySchema = z.object({

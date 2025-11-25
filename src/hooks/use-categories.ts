@@ -51,14 +51,19 @@ export function useCategories() {
       toast.error("Failed to update category");
     },
   });
-const bulkUpdateMonthMutation = useMutation({
-    mutationFn: categoryApi.bulkUpdateMonth,
+
+
+  const summariseAndUpdateMutation = useMutation({
+    mutationFn: async (month: string) => {
+      // Then summarise the month
+      await categoryApi.summariseMonth(month);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success("All categories updated successfully");
+      toast.success("Month summarised and categories updated successfully");
     },
     onError: () => {
-      toast.error("Failed to update categories");
+      toast.error("Failed to summarise and update month");
     },
   });
   return {
@@ -68,8 +73,8 @@ const bulkUpdateMonthMutation = useMutation({
     addCategory: createMutation.mutate,
     deleteCategory: deleteMutation.mutate,
     updateCategory: updateMutation.mutate,
-    bulkUpdateMonth: bulkUpdateMonthMutation.mutate,
+    summariseAndUpdateMonth: summariseAndUpdateMutation.mutate,
     isAdding: createMutation.isPending,
-    isBulkUpdating: bulkUpdateMonthMutation.isPending,
+    isSummarising: summariseAndUpdateMutation.isPending,
   };
 }

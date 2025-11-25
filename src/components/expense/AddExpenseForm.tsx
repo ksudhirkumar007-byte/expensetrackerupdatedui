@@ -49,6 +49,7 @@ export function AddExpenseForm({
       category_id: categories[0]?.id || 0,
       description: "",
       date: new Date().toISOString().split("T")[0],
+      month: new Date().toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
     },
   });
 
@@ -56,6 +57,7 @@ export function AddExpenseForm({
     onSubmit({
       ...data,
       id: Date.now(),
+      month: new Date().toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
     });
     form.reset();
   };
