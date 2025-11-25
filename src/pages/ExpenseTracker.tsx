@@ -23,13 +23,7 @@ import { CategoryStats } from "../types/expense";
 
 export default function ExpenseTracker() {
   const [selectedMonth, setSelectedMonth] = useState(() => {
-    const now = new Date();
-     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-     const month = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    const year = month.getFullYear().toString().slice(-2);
-    return `${monthNames[month.getMonth()]}-${year}`;
+    return new Date().toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
   });
 
   const { expenses, isLoading: expensesLoading, addExpense, deleteExpense, isAdding } = useExpenses(selectedMonth);
@@ -106,8 +100,22 @@ export default function ExpenseTracker() {
               <h1 className="text-4xl font-bold text-foreground">Expense Tracker</h1>
               <p className="text-muted-foreground mt-2">Manage your spending and budgets</p>
             </div>
-            <CategoryManager onAddCategory={addCategory} />
+            {!showAddForm && (
+              <Button onClick={() => setShowAddForm(true)}>
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Add New Expense
+              </Button>
+            )}
           </div>
+          
+          {showAddForm && (
+            <AddExpenseForm
+              categories={globalFilteredCategories}
+              onSubmit={handleAddExpense}
+              onCancel={() => setShowAddForm(false)}
+              isSubmitting={isAdding}
+            />
+          )}
           
           <div className="flex justify-center">
             <div className="flex items-center gap-2">
@@ -155,21 +163,9 @@ export default function ExpenseTracker() {
                   onMonthChange={setSelectedMonth}
                 />
 
-                {!showAddForm && (
-                  <Button onClick={() => setShowAddForm(true)} className="w-full">
-                    <PlusCircle className="h-4 w-4 mr-2" />
-                    Add New Expense
-                  </Button>
-                )}
 
-                {showAddForm && (
-                  <AddExpenseForm
-                    categories={globalFilteredCategories}
-                    onSubmit={handleAddExpense}
-                    onCancel={() => setShowAddForm(false)}
-                    isSubmitting={isAdding}
-                  />
-                )}
+
+
 
                 <ExpenseList
                   expenses={filteredExpenses}
@@ -183,13 +179,16 @@ export default function ExpenseTracker() {
               </TabsContent>
 
               <TabsContent value="categories" className="mt-6">
-            <CategoryList
-              categories={globalFilteredCategories}
-              onDeleteCategory={deleteCategory}
-              onUpdateCategory={updateCategory}
-              onSummariseAndUpdateMonth={summariseAndUpdateMonth}
-              isSummarising={isSummarising}
-            />
+                <div className="space-y-6">
+                  <CategoryManager onAddCategory={addCategory} />
+                  <CategoryList
+                    categories={globalFilteredCategories}
+                    onDeleteCategory={deleteCategory}
+                    onUpdateCategory={updateCategory}
+                    onSummariseAndUpdateMonth={summariseAndUpdateMonth}
+                    isSummarising={isSummarising}
+                  />
+                </div>
               </TabsContent>
             </Tabs>
           </div>

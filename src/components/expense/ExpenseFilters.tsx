@@ -31,9 +31,7 @@ export function ExpenseFilters({
     const currentDate = new Date();
     for (let i = 0; i < 12; i++) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const value = `${year}-${month}`;
+      const value = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
       const label = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
       options.push({ value, label });
     }

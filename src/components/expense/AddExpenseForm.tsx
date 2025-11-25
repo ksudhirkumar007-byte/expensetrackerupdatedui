@@ -54,10 +54,11 @@ export function AddExpenseForm({
   });
 
   const handleSubmit = (data: ExpenseFormData) => {
+    const selectedDate = new Date(data.date);
     onSubmit({
       ...data,
       id: Date.now(),
-      month: new Date().toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+      month: selectedDate.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
     });
     form.reset();
   };

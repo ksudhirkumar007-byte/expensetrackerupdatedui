@@ -18,8 +18,7 @@ export const categoryapi = axios.create({
 
 export const expenseApi = {
   getAll: (month?: string) => {
-   
-    return expenseapi.get(`/expenses/${month}`);
+    return month ? expenseapi.get(`/expenses/month/${month}`) : expenseapi.get("/expenses");
   },
   create: (data: any) => expenseapi.post("/expenses", data),
   delete: (id: number) => expenseapi.delete(`/expenses/${id}`),
