@@ -9,6 +9,8 @@ import { AddExpenseForm } from "../components/expense/AddExpenseForm";
 import { CategoryManager } from "../components/expense/CategoryManager";
 import { CategoryList } from "../components/expense/CategoryList";
 import { Analytics } from "../components/expense/Analytics";
+import { MobileHeader } from "../components/layout/MobileHeader";
+import { BottomNavigation } from "../components/layout/BottomNavigation";
 import { Button } from "../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
@@ -41,6 +43,7 @@ export default function ExpenseTracker() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedType, setSelectedType] = useState<"all" | "fixed" | "variable">("all");
   const [globalExpenseType, setGlobalExpenseType] = useState<"all" | "fixed" | "variable">("all");
+  const [currentTab, setCurrentTab] = useState("");
 
   const globalFilteredCategories = useMemo(() => {
     return categories.filter((cat) => 
@@ -93,59 +96,83 @@ export default function ExpenseTracker() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="flex flex-col gap-4 mb-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h1 className="text-4xl font-bold text-foreground">Expense Tracker</h1>
-              <p className="text-muted-foreground mt-2">Manage your spending and budgets</p>
-            </div>
-            {!showAddForm && (
-              <Button onClick={() => setShowAddForm(true)}>
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Add New Expense
-              </Button>
-            )}
-          </div>
-          
-          {showAddForm && (
-            <AddExpenseForm
-              categories={globalFilteredCategories}
-              onSubmit={handleAddExpense}
-              onCancel={() => setShowAddForm(false)}
-              isSubmitting={isAdding}
-            />
-          )}
-          
-          <div className="flex justify-center">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Expense Type:</span>
-              <Select value={globalExpenseType} onValueChange={(value: "all" | "fixed" | "variable") => setGlobalExpenseType(value)}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="fixed">Fixed</SelectItem>
-                  <SelectItem value="variable">Variable</SelectItem>
-                </SelectContent>
-              </Select>
+      {/* Mobile Header */}
+      <div className="md:hidden">
+        <MobileHeader
+          totalExpenses={totalExpenses}
+          onAddExpense={() => setShowAddForm(true)}
+          currentTab={currentTab}
+          onTabChange={setCurrentTab}
+        />
+      </div>
+
+      {/* Desktop Header */}
+      <div className="hidden md:block">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="flex flex-col gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h1 className="text-4xl font-bold text-foreground">Expense Tracker</h1>
+                <p className="text-muted-foreground mt-2">Manage your spending and budgets</p>
+              </div>
+              {!showAddForm && (
+                <Button onClick={() => setShowAddForm(true)}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add New Expense
+                </Button>
+              )}
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="mb-8">
-          <ExpenseStats
-            totalExpenses={totalExpenses}
-            avgDaily={avgDaily}
-            transactionCount={filteredExpenses.length}
-            budgetRemaining={budgetRemaining}
+      {/* Add Expense Form */}
+      {showAddForm && (
+        <div className="container mx-auto px-4 max-w-7xl">
+          <AddExpenseForm
+            categories={globalFilteredCategories}
+            onSubmit={handleAddExpense}
+            onCancel={() => setShowAddForm(false)}
+            isSubmitting={isAdding}
           />
         </div>
+      )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      {/* Main Content */}
+      <div className="container mx-auto px-4 pb-20 md:pb-8 max-w-7xl">
+        {/* Global Filter - Desktop */}
+        <div className="hidden md:flex justify-center mb-8">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">Expense Type:</span>
+            <Select value={globalExpenseType} onValueChange={(value: "all" | "fixed" | "variable") => setGlobalExpenseType(value)}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="fixed">Fixed</SelectItem>
+                <SelectItem value="variable">Variable</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Stats - Show only when no tab is selected */}
+        {!currentTab && (
+          <div className="mb-6">
+            <ExpenseStats
+              totalExpenses={totalExpenses}
+              avgDaily={avgDaily}
+              transactionCount={filteredExpenses.length}
+              budgetRemaining={budgetRemaining}
+            />
+          </div>
+        )}
+
+        {/* Desktop Layout */}
+        <div className="hidden md:grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <Tabs defaultValue="expenses" className="w-full">
+            <Tabs value={currentTab || "expenses"} onValueChange={setCurrentTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="expenses">Expenses</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -162,11 +189,6 @@ export default function ExpenseTracker() {
                   onTypeChange={setSelectedType}
                   onMonthChange={setSelectedMonth}
                 />
-
-
-
-
-
                 <ExpenseList
                   expenses={filteredExpenses}
                   categories={categories}
@@ -197,7 +219,96 @@ export default function ExpenseTracker() {
             <BudgetProgress stats={categoryStats} />
           </div>
         </div>
+
+        {/* Mobile Layout */}
+        <div className="md:hidden">
+          {/* Mobile Tab Content */}
+          {currentTab === "expenses" && (
+            <div className="space-y-4">
+              <ExpenseFilters
+                categories={globalFilteredCategories}
+                selectedCategory={selectedCategory}
+                selectedType={selectedType}
+                selectedMonth={selectedMonth}
+                onCategoryChange={setSelectedCategory}
+                onTypeChange={setSelectedType}
+                onMonthChange={setSelectedMonth}
+              />
+              <ExpenseList
+                expenses={filteredExpenses}
+                categories={categories}
+                onDelete={deleteExpense}
+              />
+            </div>
+          )}
+
+          {currentTab === "analytics" && (
+            <Analytics expenses={filteredExpenses} categories={globalFilteredCategories} />
+          )}
+
+          {currentTab === "categories" && (
+            <div className="space-y-6">
+              <CategoryManager onAddCategory={addCategory} />
+              <CategoryList
+                categories={globalFilteredCategories}
+                onDeleteCategory={deleteCategory}
+                onUpdateCategory={updateCategory}
+                onSummariseAndUpdateMonth={summariseAndUpdateMonth}
+                isSummarising={isSummarising}
+              />
+            </div>
+          )}
+
+          {/* Mobile Home View - Show stats and budget progress when no tab selected */}
+          {!currentTab && (
+            <div className="space-y-6">
+              <div className="space-y-3 mb-4">
+                <Select value={globalExpenseType} onValueChange={(value: "all" | "fixed" | "variable") => setGlobalExpenseType(value)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Expense Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="fixed">Fixed</SelectItem>
+                    <SelectItem value="variable">Variable</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(() => {
+                      const options = [];
+                      const currentDate = new Date();
+                      for (let i = 0; i < 12; i++) {
+                        const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+                        const value = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                        const label = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+                        options.push({ value, label });
+                      }
+                      return options.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ));
+                    })()}
+                  </SelectContent>
+                </Select>
+              </div>
+              <BudgetProgress stats={categoryStats} />
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Bottom Navigation - Mobile Only */}
+      <BottomNavigation
+        currentTab={currentTab}
+        onTabChange={setCurrentTab}
+        onAddExpense={() => setShowAddForm(true)}
+      />
     </div>
   );
 }
