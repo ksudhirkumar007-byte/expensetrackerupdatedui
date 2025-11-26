@@ -21,13 +21,19 @@ import {
   FormMessage,
 } from "../ui/form";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import { X } from "lucide-react";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "../ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../ui/popover";
+import { X, Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "../../lib/utils";
 
 interface AddExpenseFormProps {
   categories: Category[];
@@ -42,10 +48,11 @@ export function AddExpenseForm({
   onCancel,
   isSubmitting,
 }: AddExpenseFormProps) {
+  const [open, setOpen] = useState(false);
+  
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
-      amount: 0,
       category_id: categories[0]?.id || 0,
       description: "",
       date: new Date().toISOString().split("T")[0],
@@ -103,27 +110,57 @@ export function AddExpenseForm({
               control={form.control}
               name="category_id"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col">
                   <FormLabel>Category</FormLabel>
-                  <Select
-                    onValueChange={(value: string) =>
-                      field.onChange(parseInt(value))
-                    }
-                    value={field.value?.toString()}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id.toString()}>
-                          {cat.name} ({cat.type})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={open}
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value
+                            ? categories.find((cat) => cat.id === field.value)?.name 
+                            : "Search and select category..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Search categories..." />
+                        <CommandEmpty>No category found.</CommandEmpty>
+                        <CommandGroup className="max-h-64 overflow-auto">
+                          {categories.map((cat) => (
+                            <CommandItem
+                              key={cat.id}
+                              value={`${cat.name} ${cat.type}`}
+                              onSelect={() => {
+                                field.onChange(cat.id);
+                                setOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  field.value === cat.id ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <div className="flex flex-col">
+                                <span className="font-medium">{cat.name}</span>
+                                <span className="text-xs text-muted-foreground">{cat.type}</span>
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}

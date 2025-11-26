@@ -5,14 +5,14 @@ import { Menu, PlusCircle, Settings, TrendingUp, Home } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 interface MobileHeaderProps {
-  totalExpenses: number;
+ 
   onAddExpense: () => void;
   currentTab: string;
   onTabChange: (tab: string) => void;
 }
 
 export function MobileHeader({ 
-  totalExpenses, 
+ 
   onAddExpense, 
   currentTab, 
   onTabChange 
@@ -58,11 +58,7 @@ export function MobileHeader({
           
           <div>
             <h1 className="text-xl font-bold">Expense Tracker</h1>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs">
-                ₹{totalExpenses.toFixed(0)}
-              </Badge>
-            </div>
+           
           </div>
         </div>
 

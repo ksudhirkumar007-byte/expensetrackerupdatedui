@@ -16,7 +16,7 @@ export function BudgetProgress({ stats }: BudgetProgressProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Budget Overview</CardTitle>
+        <CardTitle>Categories Overview</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {stats.length === 0 ? (
