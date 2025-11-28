@@ -3,7 +3,7 @@
   "name": "Expense Book",
   "icons": [
     {
-      "src": "favicon.png",
+      "src": "icon-192x192.png",
       "sizes": "512x512",
       "type": "image/png"
     },
