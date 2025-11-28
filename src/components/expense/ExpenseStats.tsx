@@ -24,9 +24,9 @@ export function ExpenseStats({
       title: "Total Spent",
       value: `₹${totalExpenses.toFixed(0)}`,
       icon: TrendingDown,
-      gradient: "from-red-400 to-pink-500",
-      bgGradient: "from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20",
-      iconBg: "bg-gradient-to-r from-red-400 to-pink-500",
+      gradient: "from-slate-600 to-slate-700",
+      bgGradient: "from-slate-50 to-gray-100 dark:from-slate-800/30 dark:to-gray-800/30",
+      iconBg: "bg-gradient-to-r from-slate-500 to-slate-600",
       emoji: "💸"
      },
     // {
@@ -51,13 +51,13 @@ export function ExpenseStats({
       title: isOverBudget ? "Over Budget" : "Remaining",
       value: `₹${Math.abs(budgetRemaining).toFixed(0)}`,
       icon: DollarSign,
-      gradient: isOverBudget ? "from-red-400 to-orange-500" : "from-green-400 to-emerald-500",
+      gradient: isOverBudget ? "from-red-600 to-red-700" : "from-emerald-600 to-emerald-700",
       bgGradient: isOverBudget 
-        ? "from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20" 
-        : "from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20",
+        ? "from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30" 
+        : "from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30",
       iconBg: isOverBudget 
-        ? "bg-gradient-to-r from-red-400 to-orange-500" 
-        : "bg-gradient-to-r from-green-400 to-emerald-500",
+        ? "bg-gradient-to-r from-red-500 to-red-600" 
+        : "bg-gradient-to-r from-emerald-500 to-emerald-600",
       emoji: isOverBudget ? "⚠️" : "💰"
     }
   ];

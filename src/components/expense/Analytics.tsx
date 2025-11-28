@@ -9,6 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { ExpenseBarChart } from "./ExpenseBarChart";
+import { CategoryBarChart } from "./CategoryBarChart";
 
 interface AnalyticsProps {
   expenses: Expense[];
@@ -152,51 +154,15 @@ export function Analytics({ expenses, categories }: AnalyticsProps) {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            Daily Spending Breakdown
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {analytics.dayWise.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">No data available</p>
-          ) : (
-            <div className="space-y-3">
-              {analytics.dayWise.slice(0, 7).map(([day, amount]) => (
-                <div key={day} className="flex items-center justify-between">
-                  <span className="text-sm">{day}</span>
-                  <span className="font-semibold">₹{amount.toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <ExpenseBarChart
+        expenses={filteredExpenses}
+        categories={categories}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Category Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {analytics.categoryWise.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">No data available</p>
-          ) : (
-            <div className="space-y-3">
-              {analytics.categoryWise.map((item) => (
-                <div key={item.category?.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full bg-chart-1" />
-                    <span className="text-sm">{item.category?.name}</span>
-                  </div>
-                  <span className="font-semibold">₹{item.amount.toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <CategoryBarChart
+        expenses={filteredExpenses}
+        categories={categories}
+      />
     </div>
   );
 }

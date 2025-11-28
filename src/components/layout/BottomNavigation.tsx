@@ -35,13 +35,13 @@ export function BottomNavigation({ currentTab, onTabChange, onAddExpense }: Bott
               {item.label}
             </Button>
             {index === 2 && (
-              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
+              <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
                 <Button
                   onClick={onAddExpense}
                   size="icon"
-                  className="h-12 w-12 rounded-full shadow-lg bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 transition-all duration-200"
+                  className="h-14 w-20 rounded-full shadow-lg bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 transition-all duration-200 border-4 border-white dark:border-gray-900"
                 >
-                  <Plus className="h-5 w-5" />
+                  <Plus className="h-8 w-8" />
                 </Button>
               </div>
             )}
