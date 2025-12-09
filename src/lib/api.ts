@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://expensesapi-8mfd.onrender.com/api";
-const CATEGORYAPI_BASE_URL = "https://categoryapis.onrender.com/api";
+const API_BASE_URL = "http://65.2.70.189:8080/api";
+const CATEGORYAPI_BASE_URL = "http://65.2.70.189:8081/api";
 
 export const expenseapi = axios.create({
   baseURL: API_BASE_URL,
