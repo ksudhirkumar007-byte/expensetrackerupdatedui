@@ -60,8 +60,8 @@ export function ExpenseBarChart({ expenses, categories }: ExpenseBarChartProps) 
         </p>
       </div>
       
-      <div className="px-2 sm:px-4 overflow-x-auto">
-        <div className="flex items-end justify-center gap-1 sm:gap-2 h-48 pt-8">
+      <div className="px-4 sm:px-6 overflow-x-auto">
+        <div className="flex items-end gap-1 sm:gap-2 h-48 pt-8">
           {dailyData.map((day, index) => (
             <div key={day.date} className="flex flex-col justify-end items-center gap-2 flex-1 min-w-12 sm:min-w-16 max-w-16 sm:max-w-20 h-full">
               <div className="text-xs font-medium text-gray-800 dark:text-gray-200 mb-1">
@@ -74,7 +74,7 @@ export function ExpenseBarChart({ expenses, categories }: ExpenseBarChartProps) 
             </div>
           ))}
         </div>
-        <div className="flex justify-center gap-1 sm:gap-2 mt-2">
+        <div className="flex  gap-1 sm:gap-2 mt-2">
           {dailyData.map((day, index) => (
             <div key={`label-${day.date}`} className="flex flex-col items-center gap-1 flex-1 min-w-12 sm:min-w-16 max-w-16 sm:max-w-20">
               <div className="text-xs font-medium text-gray-600 dark:text-gray-400 text-center truncate w-full">

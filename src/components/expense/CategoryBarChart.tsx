@@ -60,20 +60,20 @@ export function CategoryBarChart({ expenses, categories }: CategoryBarChartProps
       </div>
       
       <div className="px-2 sm:px-4 overflow-x-auto">
-        <div className="flex items-end justify-center gap-1 sm:gap-2 h-48 pt-8">
+        <div className="flex items-end  gap-1 sm:gap-2 h-48 pt-8">
           {categoryData.map((category, index) => (
             <div key={category.categoryId} className="flex flex-col justify-end items-center gap-2 flex-1 min-w-12 sm:min-w-16 max-w-16 sm:max-w-20 h-full">
               <div className="text-xs font-medium text-gray-800 dark:text-gray-200 mb-1">
                 ₹{category.amount.toFixed(0)}
               </div>
-              <div 
+              <div  
                 className="w-8 sm:w-10 bg-gradient-to-t from-green-500 to-emerald-600 rounded-t-lg transition-all duration-500 ease-out min-h-2"
                 style={{ height: `${Math.max(category.percentage * 1.5, 8)}px` }}
               />
             </div>
           ))}
         </div>
-        <div className="flex justify-center gap-1 sm:gap-2 mt-2">
+        <div className="flex gap-1 sm:gap-2 mt-2">
           {categoryData.map((category, index) => (
             <div key={`label-${category.categoryId}`} className="flex flex-col items-center gap-1 flex-1 min-w-12 sm:min-w-16 max-w-16 sm:max-w-20">
               <div className="text-xs font-medium text-gray-600 dark:text-gray-400 text-center truncate w-full">

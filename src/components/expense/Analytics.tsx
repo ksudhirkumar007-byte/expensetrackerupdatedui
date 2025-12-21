@@ -11,6 +11,7 @@ import {
 } from "../ui/select";
 import { ExpenseBarChart } from "./ExpenseBarChart";
 import { CategoryBarChart } from "./CategoryBarChart";
+import { CategoryHistoricalChart } from "./CategoryHistoricalChart";
 
 interface AnalyticsProps {
   expenses: Expense[];
@@ -163,6 +164,7 @@ export function Analytics({ expenses, categories }: AnalyticsProps) {
         expenses={filteredExpenses}
         categories={categories}
       />
+
     </div>
   );
 }

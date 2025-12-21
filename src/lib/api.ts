@@ -32,4 +32,6 @@ export const categoryApi = {
   update: (id: number, data: any) => categoryapi.put(`/categories/${id}`, data),
   bulkUpdateMonth: (month: string) => categoryapi.put("/categories/bulk-update-month", { month }),
   summariseMonth: (month: string) => categoryapi.post("/categories/summarise-categories", { month }),
+  summarisedRecords: (month: string) => categoryapi.get(`/categories/summarisedcategories/month/${month}`),
+  summarisedCategories: (category: string) => categoryapi.get(`/categories/summarisedcategories/category/${category}`)
 };

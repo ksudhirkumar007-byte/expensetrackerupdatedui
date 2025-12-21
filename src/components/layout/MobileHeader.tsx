@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
-import { Menu, PlusCircle, Settings, TrendingUp, Home } from "lucide-react";
+import { Menu, PlusCircle, Settings, TrendingUp, Home, BarChart3 } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 interface MobileHeaderProps {
@@ -18,9 +19,11 @@ export function MobileHeader({
   onTabChange 
 }: MobileHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const menuItems = [
     { id: "categories", label: "Categories", icon: Settings },
+    { id: "historical", label: "Historical Analytics", icon: BarChart3 },
   ];
 
   return (
@@ -43,7 +46,11 @@ export function MobileHeader({
                       variant={currentTab === item.id ? "default" : "ghost"}
                       className="w-full justify-start"
                       onClick={() => {
-                        onTabChange(item.id);
+                        if (item.id === "historical") {
+                          navigate("/historical");
+                        } else {
+                          onTabChange(item.id);
+                        }
                         setIsOpen(false);
                       }}
                     >

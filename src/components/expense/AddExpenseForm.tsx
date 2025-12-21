@@ -53,7 +53,7 @@ export function AddExpenseForm({
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
-      category_id: categories[0]?.id || 0,
+      category_id: 4,
       description: "",
       date: new Date().toISOString().split("T")[0],
       month: new Date().toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
@@ -84,27 +84,25 @@ export function AddExpenseForm({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-4"
           >
+            
             <FormField
               control={form.control}
-              name="amount"
+              name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount</FormLabel>
+                  <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
+                    <Textarea
+                      placeholder="What did you spend on?"
+                      className="resize-none"
                       {...field}
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value) || 0)
-                      }
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+           
 
             <FormField
               control={form.control}
@@ -165,18 +163,21 @@ export function AddExpenseForm({
                 </FormItem>
               )}
             />
-
-            <FormField
+ <FormField
               control={form.control}
-              name="description"
+              name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Amount</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="What did you spend on?"
-                      className="resize-none"
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
                       {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || 0)
+                      }
                     />
                   </FormControl>
                   <FormMessage />

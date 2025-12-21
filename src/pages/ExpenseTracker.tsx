@@ -40,30 +40,49 @@ export default function ExpenseTracker() {
   } = useCategories();
   
   const [showAddForm, setShowAddForm] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedType, setSelectedType] = useState<"all" | "fixed" | "variable">("all");
-  const [globalExpenseType, setGlobalExpenseType] = useState<"all" | "fixed" | "variable">("all");
   const [currentTab, setCurrentTab] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Independent filter states for each tab
+  const [homeFilters, setHomeFilters] = useState({
+    globalExpenseType: "variable" as "all" | "fixed" | "variable",
+    selectedMonth: new Date().toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
+  });
+  
+  const [expenseFilters, setExpenseFilters] = useState({
+    selectedCategory: "all",
+    selectedType: "all" as "all" | "fixed" | "variable",
+    selectedMonth: new Date().toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
+  });
+  
+  const [analyticsFilters, setAnalyticsFilters] = useState({
+    globalExpenseType: "all" as "all" | "fixed" | "variable",
+    selectedMonth: new Date().toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+    selectedCategory: "all"
+  });
 
   const globalFilteredCategories = useMemo(() => {
+    const currentGlobalType = currentTab === "analytics" ? analyticsFilters.globalExpenseType : homeFilters.globalExpenseType;
     return categories.filter((cat) => 
-      globalExpenseType === "all" || cat.type === globalExpenseType
+      currentGlobalType === "all" || cat.type === currentGlobalType
     );
-  }, [categories, globalExpenseType]);
+  }, [categories, homeFilters.globalExpenseType, analyticsFilters.globalExpenseType, currentTab]);
 
   const filteredExpenses = useMemo(() => {
+    const currentFilters = currentTab === "analytics" ? analyticsFilters : expenseFilters;
+    const currentGlobalType = currentTab === "analytics" ? analyticsFilters.globalExpenseType : homeFilters.globalExpenseType;
+    
     return expenses.filter((exp) => {
       const cat = categories.find((c) => c.id === exp.category_id);
       if (!cat) return false;
 
-      const matchesGlobalType = globalExpenseType === "all" || cat.type === globalExpenseType;
-      const matchesType = selectedType === "all" || cat.type === selectedType;
-      const matchesCategory = selectedCategory === "all" || cat.id.toString() === selectedCategory;
+      const matchesGlobalType = currentGlobalType === "all" || cat.type === currentGlobalType;
+      //const matchesType = currentFilters.selectedType === "all" || cat.type === currentFilters.selectedType;
+      const matchesCategory = currentFilters.selectedCategory === "all" || cat.id.toString() === currentFilters.selectedCategory;
 
-      return matchesGlobalType && matchesType && matchesCategory;
+      return matchesGlobalType  && matchesCategory;
     });
-  }, [expenses, categories, selectedCategory, selectedType, globalExpenseType]);
+  }, [expenses, categories, expenseFilters, analyticsFilters, homeFilters.globalExpenseType, currentTab]);
 
   const categoryStats: CategoryStats[] = useMemo(() => {
     return globalFilteredCategories.map((cat) => {
@@ -182,7 +201,7 @@ export default function ExpenseTracker() {
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">📊 Expense Type:</span>
                   </div>
-                  <Select value={globalExpenseType} onValueChange={(value: "all" | "fixed" | "variable") => setGlobalExpenseType(value)}>
+                  <Select value={homeFilters.globalExpenseType} onValueChange={(value: "all" | "fixed" | "variable") => setHomeFilters(prev => ({...prev, globalExpenseType: value}))}>
                     <SelectTrigger className="w-[160px] border-2 border-purple-200 focus:border-purple-500 rounded-xl bg-white/50 dark:bg-gray-700/50 font-medium">
                       <SelectValue placeholder="Select Type" />
                     </SelectTrigger>
@@ -231,7 +250,7 @@ export default function ExpenseTracker() {
                     <span className="text-base">📊</span>
                     Expense Type
                   </label>
-                  <Select value={globalExpenseType} onValueChange={(value: "all" | "fixed" | "variable") => setGlobalExpenseType(value)}>
+                  <Select value={homeFilters.globalExpenseType} onValueChange={(value: "all" | "fixed" | "variable") => setHomeFilters(prev => ({...prev, globalExpenseType: value}))}>
                     <SelectTrigger className="w-full border-2 border-blue-200 focus:border-blue-500 rounded-xl bg-white/70 dark:bg-gray-700/70 font-medium h-12">
                       <SelectValue placeholder="Select Expense Type" />
                     </SelectTrigger>
@@ -248,7 +267,7 @@ export default function ExpenseTracker() {
                     <span className="text-base">📅</span>
                     Time Period
                   </label>
-                  <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                  <Select value={homeFilters.selectedMonth} onValueChange={(month: string) => setHomeFilters(prev => ({...prev, selectedMonth: month}))}>
                     <SelectTrigger className="w-full border-2 border-purple-200 focus:border-purple-500 rounded-xl bg-white/70 dark:bg-gray-700/70 font-medium h-12">
                       <SelectValue placeholder="Select Month" />
                     </SelectTrigger>
@@ -326,12 +345,12 @@ export default function ExpenseTracker() {
                     <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-4">
                       <ExpenseFilters
                         categories={globalFilteredCategories}
-                        selectedCategory={selectedCategory}
-                        selectedType={selectedType}
-                        selectedMonth={selectedMonth}
-                        onCategoryChange={setSelectedCategory}
-                        onTypeChange={setSelectedType}
-                        onMonthChange={setSelectedMonth}
+                        selectedCategory={expenseFilters.selectedCategory}
+                        selectedType={expenseFilters.selectedType}
+                        selectedMonth={expenseFilters.selectedMonth}
+                        onCategoryChange={(value) => setExpenseFilters(prev => ({...prev, selectedCategory: value}))}
+                        onTypeChange={(value) => setExpenseFilters(prev => ({...prev, selectedType: value}))}
+                        onMonthChange={(value) => setExpenseFilters(prev => ({...prev, selectedMonth: value}))}
                       />
                     </div>
                   )}
@@ -373,7 +392,7 @@ export default function ExpenseTracker() {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">📊 Expense Type</label>
-                          <Select value={globalExpenseType} onValueChange={(value: "all" | "fixed" | "variable") => setGlobalExpenseType(value)}>
+                          <Select value={analyticsFilters.globalExpenseType} onValueChange={(value: "all" | "fixed" | "variable") => setAnalyticsFilters(prev => ({...prev, globalExpenseType: value}))}>
                             <SelectTrigger className="w-full border border-gray-300 focus:border-green-400 rounded-lg">
                               <SelectValue placeholder="Select Type" />
                             </SelectTrigger>
@@ -387,7 +406,7 @@ export default function ExpenseTracker() {
                         
                         <div>
                           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">📅 Time Period</label>
-                          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                          <Select value={analyticsFilters.selectedMonth} onValueChange={(month: string) => setAnalyticsFilters(prev => ({...prev, selectedMonth: month}))}>
                             <SelectTrigger className="w-full border border-gray-300 focus:border-green-400 rounded-lg">
                               <SelectValue placeholder="Select Month" />
                             </SelectTrigger>
@@ -413,7 +432,7 @@ export default function ExpenseTracker() {
                         
                         <div>
                           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">🏷️ Category</label>
-                          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                          <Select value={analyticsFilters.selectedCategory} onValueChange={(value) => setAnalyticsFilters(prev => ({...prev, selectedCategory: value}))}>
                             <SelectTrigger className="w-full border border-gray-300 focus:border-green-400 rounded-lg">
                               <SelectValue placeholder="Select Category" />
                             </SelectTrigger>
@@ -497,12 +516,12 @@ export default function ExpenseTracker() {
                   <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-4">
                     <ExpenseFilters
                       categories={globalFilteredCategories}
-                      selectedCategory={selectedCategory}
-                      selectedType={selectedType}
-                      selectedMonth={selectedMonth}
-                      onCategoryChange={setSelectedCategory}
-                      onTypeChange={setSelectedType}
-                      onMonthChange={setSelectedMonth}
+                      selectedCategory={expenseFilters.selectedCategory}
+                      selectedType={expenseFilters.selectedType}
+                      selectedMonth={expenseFilters.selectedMonth}
+                      onCategoryChange={(value) => setExpenseFilters(prev => ({...prev, selectedCategory: value}))}
+                      onTypeChange={(value) => setExpenseFilters(prev => ({...prev, selectedType: value}))}
+                      onMonthChange={(value) => setExpenseFilters(prev => ({...prev, selectedMonth: value}))}
                     />
                   </div>
                 )}
@@ -545,7 +564,7 @@ export default function ExpenseTracker() {
                   <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-4 space-y-3">
                     <div>
                       <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">📊 Expense Type</label>
-                      <Select value={globalExpenseType} onValueChange={(value: "all" | "fixed" | "variable") => setGlobalExpenseType(value)}>
+                      <Select value={analyticsFilters.globalExpenseType} onValueChange={(value: "all" | "fixed" | "variable") => setAnalyticsFilters(prev => ({...prev, globalExpenseType: value}))}>
                         <SelectTrigger className="w-full border border-gray-300 focus:border-green-400 rounded-lg h-10">
                           <SelectValue placeholder="Select Type" />
                         </SelectTrigger>
@@ -559,7 +578,7 @@ export default function ExpenseTracker() {
                     
                     <div>
                       <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">📅 Time Period</label>
-                      <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                      <Select value={analyticsFilters.selectedMonth} onValueChange={(month: string) => setAnalyticsFilters(prev => ({...prev, selectedMonth: month}))}>
                         <SelectTrigger className="w-full border border-gray-300 focus:border-green-400 rounded-lg h-10">
                           <SelectValue placeholder="Select Month" />
                         </SelectTrigger>

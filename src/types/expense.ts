@@ -5,8 +5,17 @@ export interface Category {
   type: "fixed" | "variable";
   icon?: string;
   month?: string;
+  totalSpent?:number;
 }
-
+export interface MonthSummary {
+  id: number;
+  categoryName: string;
+  budget: number;
+  type: "fixed" | "variable";
+  icon?: string;
+  month?: string;
+  totalSpent?:number;
+}
 export interface Expense {
   id: number;
   amount: number;
