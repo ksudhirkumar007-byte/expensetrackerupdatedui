@@ -18,7 +18,7 @@ export function useExpenses(month?: string) {
       const offlineExpenses = offlineStorage.getExpenses();
       if (offlineExpenses.length > 0) {
         return offlineExpenses.filter(expense => 
-          !month || expense.date.includes(month)
+          !month || expense.month === month
         );
       }
       

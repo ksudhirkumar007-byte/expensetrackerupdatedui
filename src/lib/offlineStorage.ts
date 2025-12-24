@@ -174,17 +174,17 @@ export const offlineStorage = {
         await categoryApi.delete(id);
       }
 
-      // Fetch latest data from server
+      // Fetch latest data from server and merge with local data
       const [expensesRes, categoriesRes] = await Promise.all([
         expenseApi.getAll(),
         categoryApi.getAll()
       ]);
 
-      // Update local storage
+      // Update local storage with server data
       offlineStorage.saveExpenses(expensesRes.data);
       offlineStorage.saveCategories(categoriesRes.data);
 
-      // Clear pending sync
+      // Clear pending sync since we've synced everything
       offlineStorage.clearPendingSync();
       offlineStorage.setLastSync(new Date());
 
