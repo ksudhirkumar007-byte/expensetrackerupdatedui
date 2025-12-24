@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { categoryApi } from "../lib/api";
-import { offlineStorage } from "../lib/offlineStorage";
+import { offlineStorage, STORAGE_KEYS } from "../lib/offlineStorage";
 import { Category } from "../types/expense";
 import { toast } from "sonner";
 
@@ -38,22 +38,28 @@ export function useCategories() {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
+      // Always save locally first
+      const newCategory = offlineStorage.addCategory(data);
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+
+      // Try to sync immediately if online
       if (offlineStorage.isOnline()) {
-        return await categoryApi.create(data);
-      } else {
-        // Offline: save locally
-        const newCategory = offlineStorage.addCategory(data);
-        queryClient.invalidateQueries({ queryKey: ["categories"] });
-        return { data: newCategory };
+        try {
+          await categoryApi.create(newCategory);
+          // If successful, remove from pending sync
+          const pending = offlineStorage.getPendingSync();
+          pending.categories.create = pending.categories.create.filter(c => c.id !== newCategory.id);
+          localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(pending));
+        } catch (error) {
+          // Keep in pending sync for later
+          console.log('Failed to sync, will retry later');
+        }
       }
+
+      return { data: newCategory };
     },
     onSuccess: () => {
-      if (offlineStorage.isOnline()) {
-        queryClient.invalidateQueries({ queryKey: ["categories"] });
-        toast.success("Category created successfully");
-      } else {
-        toast.success("Category created locally (will sync when online)");
-      }
+      toast.success("Category created successfully");
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to create category");
@@ -62,22 +68,28 @@ export function useCategories() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
+      // Always delete locally first
+      offlineStorage.deleteCategory(id);
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+
+      // Try to sync immediately if online
       if (offlineStorage.isOnline()) {
-        return await categoryApi.delete(id);
-      } else {
-        // Offline: delete locally
-        offlineStorage.deleteCategory(id);
-        queryClient.invalidateQueries({ queryKey: ["categories"] });
-        return { data: null };
+        try {
+          await categoryApi.delete(id);
+          // If successful, remove from pending sync
+          const pending = offlineStorage.getPendingSync();
+          pending.categories.delete = pending.categories.delete.filter(deleteId => deleteId !== id);
+          localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(pending));
+        } catch (error) {
+          // Keep in pending sync for later
+          console.log('Failed to sync, will retry later');
+        }
       }
+
+      return { data: null };
     },
     onSuccess: () => {
-      if (offlineStorage.isOnline()) {
-        queryClient.invalidateQueries({ queryKey: ["categories"] });
-        toast.success("Category deleted successfully");
-      } else {
-        toast.success("Category deleted locally (will sync when online)");
-      }
+      toast.success("Category deleted successfully");
     },
     onError: () => {
       toast.error("Failed to delete category");
@@ -86,22 +98,28 @@ export function useCategories() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      // Always update locally first
+      offlineStorage.updateCategory(id, data);
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+
+      // Try to sync immediately if online
       if (offlineStorage.isOnline()) {
-        return await categoryApi.update(id, data);
-      } else {
-        // Offline: update locally
-        offlineStorage.updateCategory(id, data);
-        queryClient.invalidateQueries({ queryKey: ["categories"] });
-        return { data: null };
+        try {
+          await categoryApi.update(id, data);
+          // If successful, remove from pending sync
+          const pending = offlineStorage.getPendingSync();
+          pending.categories.update = pending.categories.update.filter(c => c.id !== id);
+          localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(pending));
+        } catch (error) {
+          // Keep in pending sync for later
+          console.log('Failed to sync, will retry later');
+        }
       }
+
+      return { data: null };
     },
     onSuccess: () => {
-      if (offlineStorage.isOnline()) {
-        queryClient.invalidateQueries({ queryKey: ["categories"] });
-        toast.success("Category updated successfully");
-      } else {
-        toast.success("Category updated locally (will sync when online)");
-      }
+      toast.success("Category updated successfully");
     },
     onError: () => {
       toast.error("Failed to update category");

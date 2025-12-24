@@ -9,6 +9,8 @@ const STORAGE_KEYS = {
   PENDING_SYNC: 'pendingSync'
 };
 
+export { STORAGE_KEYS };
+
 interface PendingSync {
   expenses: {
     create: Expense[];

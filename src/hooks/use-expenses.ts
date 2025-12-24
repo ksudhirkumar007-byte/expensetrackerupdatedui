@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { expenseApi } from "../lib/api";
-import { offlineStorage } from "../lib/offlineStorage";
+import { offlineStorage, STORAGE_KEYS } from "../lib/offlineStorage";
 import { Expense } from "../types/expense";
 import { toast } from "sonner";
 
@@ -40,22 +40,28 @@ export function useExpenses(month?: string) {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
+      // Always save locally first (offline-first approach)
+      const newExpense = offlineStorage.addExpense(data);
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+
+      // Try to sync immediately if online
       if (offlineStorage.isOnline()) {
-        return await expenseApi.create(data);
-      } else {
-        // Offline: save locally
-        const newExpense = offlineStorage.addExpense(data);
-        queryClient.invalidateQueries({ queryKey: ["expenses"] });
-        return { data: newExpense };
+        try {
+          await expenseApi.create(newExpense);
+          // If successful, remove from pending sync
+          const pending = offlineStorage.getPendingSync();
+          pending.expenses.create = pending.expenses.create.filter(e => e.id !== newExpense.id);
+          localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(pending));
+        } catch (error) {
+          // Keep in pending sync for later
+          console.log('Failed to sync, will retry later');
+        }
       }
+
+      return { data: newExpense };
     },
     onSuccess: () => {
-      if (offlineStorage.isOnline()) {
-        queryClient.invalidateQueries({ queryKey: ["expenses"] });
-        toast.success("Expense added successfully");
-      } else {
-        toast.success("Expense added locally (will sync when online)");
-      }
+      toast.success("Expense added successfully");
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to add expense");
@@ -64,22 +70,28 @@ export function useExpenses(month?: string) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
+      // Always delete locally first
+      offlineStorage.deleteExpense(id);
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+
+      // Try to sync immediately if online
       if (offlineStorage.isOnline()) {
-        return await expenseApi.delete(id);
-      } else {
-        // Offline: delete locally
-        offlineStorage.deleteExpense(id);
-        queryClient.invalidateQueries({ queryKey: ["expenses"] });
-        return { data: null };
+        try {
+          await expenseApi.delete(id);
+          // If successful, remove from pending sync
+          const pending = offlineStorage.getPendingSync();
+          pending.expenses.delete = pending.expenses.delete.filter(deleteId => deleteId !== id);
+          localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(pending));
+        } catch (error) {
+          // Keep in pending sync for later
+          console.log('Failed to sync, will retry later');
+        }
       }
+
+      return { data: null };
     },
     onSuccess: () => {
-      if (offlineStorage.isOnline()) {
-        queryClient.invalidateQueries({ queryKey: ["expenses"] });
-        toast.success("Expense deleted successfully");
-      } else {
-        toast.success("Expense deleted locally (will sync when online)");
-      }
+      toast.success("Expense deleted successfully");
     },
     onError: () => {
       toast.error("Failed to delete expense");
@@ -88,22 +100,28 @@ export function useExpenses(month?: string) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      // Always update locally first
+      offlineStorage.updateExpense(id, data);
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+
+      // Try to sync immediately if online
       if (offlineStorage.isOnline()) {
-        return await expenseApi.update(id, data);
-      } else {
-        // Offline: update locally
-        offlineStorage.updateExpense(id, data);
-        queryClient.invalidateQueries({ queryKey: ["expenses"] });
-        return { data: null };
+        try {
+          await expenseApi.update(id, data);
+          // If successful, remove from pending sync
+          const pending = offlineStorage.getPendingSync();
+          pending.expenses.update = pending.expenses.update.filter(e => e.id !== id);
+          localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(pending));
+        } catch (error) {
+          // Keep in pending sync for later
+          console.log('Failed to sync, will retry later');
+        }
       }
+
+      return { data: null };
     },
     onSuccess: () => {
-      if (offlineStorage.isOnline()) {
-        queryClient.invalidateQueries({ queryKey: ["expenses"] });
-        toast.success("Expense updated successfully");
-      } else {
-        toast.success("Expense updated locally (will sync when online)");
-      }
+      toast.success("Expense updated successfully");
     },
     onError: () => {
       toast.error("Failed to update expense");
