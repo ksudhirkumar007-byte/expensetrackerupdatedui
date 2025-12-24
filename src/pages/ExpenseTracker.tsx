@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useExpenses } from "../hooks/use-expenses";
 import { useCategories } from "../hooks/use-categories";
+import { useSync } from "../hooks/use-sync";
 import { ExpenseStats } from "../components/expense/ExpenseStats";
 import { BudgetProgress } from "../components/expense/BudgetProgress";
 import { ExpenseFilters } from "../components/expense/ExpenseFilters";
@@ -38,6 +39,7 @@ export default function ExpenseTracker() {
     summariseAndUpdateMonth,
     isSummarising,
   } = useCategories();
+  const { sync, isSyncing, lastSync, hasPendingChanges, isOnline } = useSync();
   
   const [showAddForm, setShowAddForm] = useState(false);
   const [currentTab, setCurrentTab] = useState("");
@@ -123,6 +125,11 @@ export default function ExpenseTracker() {
           onAddExpense={() => setShowAddForm(true)}
           currentTab={currentTab}
           onTabChange={setCurrentTab}
+          onSync={sync}
+          isSyncing={isSyncing}
+          hasPendingChanges={hasPendingChanges()}
+          isOnline={isOnline}
+          lastSync={lastSync}
         />
       </div>
 

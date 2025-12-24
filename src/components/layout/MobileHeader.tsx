@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
-import { Menu, PlusCircle, Settings, TrendingUp, Home, BarChart3 } from "lucide-react";
+import { Menu, PlusCircle, Settings, TrendingUp, Home, BarChart3, RefreshCw, Wifi, WifiOff } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 interface MobileHeaderProps {
@@ -10,13 +10,23 @@ interface MobileHeaderProps {
   onAddExpense: () => void;
   currentTab: string;
   onTabChange: (tab: string) => void;
+  onSync: () => void;
+  isSyncing: boolean;
+  hasPendingChanges: boolean;
+  isOnline: boolean;
+  lastSync: Date | null;
 }
 
 export function MobileHeader({ 
  
   onAddExpense, 
   currentTab, 
-  onTabChange 
+  onTabChange,
+  onSync,
+  isSyncing,
+  hasPendingChanges,
+  isOnline,
+  lastSync
 }: MobileHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
@@ -65,18 +75,42 @@ export function MobileHeader({
           
           <div>
             <h1 className="text-xl font-bold">Expense Tracker</h1>
-           
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              {isOnline ? (
+                <Wifi className="h-3 w-3 text-green-500" />
+              ) : (
+                <WifiOff className="h-3 w-3 text-red-500" />
+              )}
+              <span>{isOnline ? "Online" : "Offline"}</span>
+              {lastSync && (
+                <span>Last sync: {lastSync.toLocaleString()}</span>
+              )}
+            </div>
           </div>
         </div>
 
-        <Button 
-          onClick={onAddExpense}
-          size="sm"
-          className="shadow-lg"
-        >
-          <PlusCircle className="h-4 w-4 mr-1" />
-          Add
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={onSync}
+            size="sm"
+            variant="outline"
+            disabled={isSyncing || !isOnline}
+            className="shadow-lg"
+          >
+            <RefreshCw className={`h-4 w-4 mr-1 ${isSyncing ? 'animate-spin' : ''}`} />
+            Sync
+            {hasPendingChanges && <Badge variant="destructive" className="ml-1 h-2 w-2 p-0" />}
+          </Button>
+
+          <Button 
+            onClick={onAddExpense}
+            size="sm"
+            className="shadow-lg"
+          >
+            <PlusCircle className="h-4 w-4 mr-1" />
+            Add
+          </Button>
+        </div>
       </div>
     </div>
   );

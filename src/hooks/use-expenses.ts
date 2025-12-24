@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { expenseApi } from "../lib/api";
+import { offlineStorage } from "../lib/offlineStorage";
 import { Expense } from "../types/expense";
 import { toast } from "sonner";
 
@@ -13,16 +14,48 @@ export function useExpenses(month?: string) {
   } = useQuery<Expense[]>({
     queryKey: ["expenses", month],
     queryFn: async () => {
-      const { data } = await expenseApi.getAll(month);
-      return data;
+      // Try to get from offline storage first
+      const offlineExpenses = offlineStorage.getExpenses();
+      if (offlineExpenses.length > 0) {
+        return offlineExpenses.filter(expense => 
+          !month || expense.date.includes(month)
+        );
+      }
+      
+      // If no offline data, try to fetch from API
+      if (offlineStorage.isOnline()) {
+        try {
+          const { data } = await expenseApi.getAll(month);
+          offlineStorage.saveExpenses(data);
+          return data;
+        } catch (error) {
+          // If API fails, return empty array
+          return [];
+        }
+      }
+      
+      return [];
     },
   });
 
   const createMutation = useMutation({
-    mutationFn: expenseApi.create,
+    mutationFn: async (data: any) => {
+      if (offlineStorage.isOnline()) {
+        return await expenseApi.create(data);
+      } else {
+        // Offline: save locally
+        const newExpense = offlineStorage.addExpense(data);
+        queryClient.invalidateQueries({ queryKey: ["expenses"] });
+        return { data: newExpense };
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      toast.success("Expense added successfully");
+      if (offlineStorage.isOnline()) {
+        queryClient.invalidateQueries({ queryKey: ["expenses"] });
+        toast.success("Expense added successfully");
+      } else {
+        toast.success("Expense added locally (will sync when online)");
+      }
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to add expense");
@@ -30,10 +63,23 @@ export function useExpenses(month?: string) {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: expenseApi.delete,
+    mutationFn: async (id: number) => {
+      if (offlineStorage.isOnline()) {
+        return await expenseApi.delete(id);
+      } else {
+        // Offline: delete locally
+        offlineStorage.deleteExpense(id);
+        queryClient.invalidateQueries({ queryKey: ["expenses"] });
+        return { data: null };
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      toast.success("Expense deleted successfully");
+      if (offlineStorage.isOnline()) {
+        queryClient.invalidateQueries({ queryKey: ["expenses"] });
+        toast.success("Expense deleted successfully");
+      } else {
+        toast.success("Expense deleted locally (will sync when online)");
+      }
     },
     onError: () => {
       toast.error("Failed to delete expense");
@@ -41,11 +87,23 @@ export function useExpenses(month?: string) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) =>
-      expenseApi.update(id, data),
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      if (offlineStorage.isOnline()) {
+        return await expenseApi.update(id, data);
+      } else {
+        // Offline: update locally
+        offlineStorage.updateExpense(id, data);
+        queryClient.invalidateQueries({ queryKey: ["expenses"] });
+        return { data: null };
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      toast.success("Expense updated successfully");
+      if (offlineStorage.isOnline()) {
+        queryClient.invalidateQueries({ queryKey: ["expenses"] });
+        toast.success("Expense updated successfully");
+      } else {
+        toast.success("Expense updated locally (will sync when online)");
+      }
     },
     onError: () => {
       toast.error("Failed to update expense");
