@@ -32,6 +32,7 @@ interface CategoryListProps {
   onUpdateCategory: (args: { id: number; data: any }) => void;
   onSummariseAndUpdateMonth: (month: string) => void;
   isSummarising: boolean;
+  onCategoryClick?: (categoryId: number) => void;
 }
 
 export function CategoryList({
@@ -40,6 +41,7 @@ export function CategoryList({
   onUpdateCategory,
   onSummariseAndUpdateMonth,
   isSummarising,
+  onCategoryClick,
 }: CategoryListProps) {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [showSummarise, setShowSummarise] = useState(false);
@@ -87,7 +89,12 @@ export function CategoryList({
               ) : (
                 categories.map((category) => (
                   <TableRow key={category.id}>
-                    <TableCell className="font-medium">{category.name}</TableCell>
+                    <TableCell 
+                      className={`font-medium ${onCategoryClick ? 'cursor-pointer hover:text-primary' : ''}`}
+                      onClick={() => onCategoryClick?.(category.id)}
+                    >
+                      {category.name}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={category.type === "fixed" ? "secondary" : "outline"}>
                         {category.type}

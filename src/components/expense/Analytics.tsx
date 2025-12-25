@@ -16,9 +16,10 @@ import { CategoryHistoricalChart } from "./CategoryHistoricalChart";
 interface AnalyticsProps {
   expenses: Expense[];
   categories: Category[];
+  onDateClick?: (date: string) => void;
 }
 
-export function Analytics({ expenses, categories }: AnalyticsProps) {
+export function Analytics({ expenses, categories, onDateClick }: AnalyticsProps) {
   const [selectedType, setSelectedType] = useState<"all" | "fixed" | "variable">("all");
 
   const filteredExpenses = useMemo(() => {
@@ -158,6 +159,7 @@ export function Analytics({ expenses, categories }: AnalyticsProps) {
       <ExpenseBarChart
         expenses={filteredExpenses}
         categories={categories}
+        onDateClick={onDateClick}
       />
 
       <CategoryBarChart

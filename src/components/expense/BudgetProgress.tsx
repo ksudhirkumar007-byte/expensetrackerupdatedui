@@ -10,9 +10,10 @@ import { AlertCircle, CheckCircle } from "lucide-react";
 
 interface BudgetProgressProps {
   stats: CategoryStats[];
+  onCategoryClick?: (categoryId: number) => void;
 }
 
-export function BudgetProgress({ stats }: BudgetProgressProps) {
+export function BudgetProgress({ stats, onCategoryClick }: BudgetProgressProps) {
   return (
     <Card>
       <CardHeader>
@@ -29,7 +30,13 @@ export function BudgetProgress({ stats }: BudgetProgressProps) {
             const isNearLimit = stat.percentage > 80 && stat.percentage <= 100;
 
             return (
-              <div key={stat.category.id} className="space-y-2">
+              <div 
+                key={stat.category.id} 
+                className={`space-y-2 p-2 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+                  onCategoryClick ? 'hover:shadow-sm' : ''
+                }`}
+                onClick={() => onCategoryClick?.(stat.category.id)}
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-sm">

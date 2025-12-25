@@ -5,9 +5,10 @@ import { TrendingDown } from "lucide-react";
 interface ExpenseBarChartProps {
   expenses: Expense[];
   categories: Category[];
+  onDateClick?: (date: string) => void;
 }
 
-export function ExpenseBarChart({ expenses, categories }: ExpenseBarChartProps) {
+export function ExpenseBarChart({ expenses, categories, onDateClick }: ExpenseBarChartProps) {
   const dailyData = useMemo(() => {
     const grouped = expenses.reduce((acc, expense) => {
       const date = expense.date;
@@ -68,8 +69,11 @@ export function ExpenseBarChart({ expenses, categories }: ExpenseBarChartProps) 
                 ₹{day.amount.toFixed(0)}
               </div>
               <div 
-                className="w-8 sm:w-10 bg-gradient-to-t from-blue-500 to-purple-600 rounded-t-lg transition-all duration-500 ease-out min-h-2"
+                className={`w-8 sm:w-10 bg-gradient-to-t from-blue-500 to-purple-600 rounded-t-lg transition-all duration-500 ease-out min-h-2 ${
+                  onDateClick ? 'cursor-pointer hover:from-blue-600 hover:to-purple-700' : ''
+                }`}
                 style={{ height: `${Math.max(day.percentage * 1.5, 8)}px` }}
+                onClick={() => onDateClick?.(day.date)}
               />
             </div>
           ))}
