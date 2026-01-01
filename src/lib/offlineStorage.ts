@@ -151,44 +151,54 @@ export const offlineStorage = {
 
     try {
       const pending = offlineStorage.getPendingSync();
+      let syncedCount = 0;
 
       // Sync expenses
       for (const expense of pending.expenses.create) {
         await expenseApi.create(expense);
+        syncedCount++;
       }
       for (const expense of pending.expenses.update) {
         await expenseApi.update(expense.id, expense);
+        syncedCount++;
       }
       for (const id of pending.expenses.delete) {
         await expenseApi.delete(id);
+        syncedCount++;
       }
 
       // Sync categories
       for (const category of pending.categories.create) {
         await categoryApi.create(category);
+        syncedCount++;
       }
       for (const category of pending.categories.update) {
         await categoryApi.update(category.id, category);
+        syncedCount++;
       }
       for (const id of pending.categories.delete) {
         await categoryApi.delete(id);
+        syncedCount++;
       }
 
-      // Fetch latest data from server and merge with local data
+      // Fetch latest data from server to refresh cache
       const [expensesRes, categoriesRes] = await Promise.all([
         expenseApi.getAll(),
         categoryApi.getAll()
       ]);
 
-      // Update local storage with server data
+      // Update local cache with fresh server data
       offlineStorage.saveExpenses(expensesRes.data);
       offlineStorage.saveCategories(categoriesRes.data);
 
-      // Clear pending sync since we've synced everything
+      // Clear pending sync since everything is synced
       offlineStorage.clearPendingSync();
       offlineStorage.setLastSync(new Date());
 
-      return { success: true, message: "Sync completed successfully" };
+      return { 
+        success: true, 
+        message: syncedCount > 0 ? `Synced ${syncedCount} changes successfully` : "Already up to date" 
+      };
     } catch (error: any) {
       return { success: false, message: error.response?.data?.message || "Sync failed" };
     }

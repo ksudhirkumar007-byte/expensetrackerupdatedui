@@ -3,28 +3,38 @@ import { Toaster as Sonner } from "./components/ui/sonner";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { authStorage } from "./lib/auth";
 import ExpenseTracker from "./pages/ExpenseTracker";
+import LoginPage from "./pages/LoginPage";
 import HistoricalAnalytics from "./components/expense/HistoricalAnalytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<ExpenseTracker />} />
-          <Route path="/historical" element={<HistoricalAnalytics />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const isAuthenticated = authStorage.isAuthenticated();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {isAuthenticated ? (
+              <>
+                <Route path="/" element={<ExpenseTracker />} />
+                <Route path="/historical" element={<HistoricalAnalytics />} />
+              </>
+            ) : (
+              <Route path="*" element={<LoginPage />} />
+            )}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

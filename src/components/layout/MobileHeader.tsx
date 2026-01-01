@@ -2,11 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
-import { Menu, PlusCircle, Settings, TrendingUp, Home, BarChart3, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { Menu, PlusCircle, Settings, TrendingUp, Home, BarChart3, RefreshCw, Wifi, WifiOff, LogOut } from "lucide-react";
 import { Badge } from "../ui/badge";
 
 interface MobileHeaderProps {
- 
   onAddExpense: () => void;
   currentTab: string;
   onTabChange: (tab: string) => void;
@@ -15,10 +14,12 @@ interface MobileHeaderProps {
   hasPendingChanges: boolean;
   isOnline: boolean;
   lastSync: Date | null;
+  onLogout: () => void;
+  onRefresh: () => void;
+  isRefreshing: boolean;
 }
 
 export function MobileHeader({ 
- 
   onAddExpense, 
   currentTab, 
   onTabChange,
@@ -26,7 +27,10 @@ export function MobileHeader({
   isSyncing,
   hasPendingChanges,
   isOnline,
-  lastSync
+  lastSync,
+  onLogout,
+  onRefresh,
+  isRefreshing
 }: MobileHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
@@ -68,6 +72,33 @@ export function MobileHeader({
                       {item.label}
                     </Button>
                   ))}
+                  
+                  <div className="border-t pt-2 mt-4">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-green-600"
+                      onClick={() => {
+                        onRefresh();
+                        setIsOpen(false);
+                      }}
+                      disabled={isRefreshing}
+                    >
+                      <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                      Refresh Tokens
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-red-600"
+                      onClick={() => {
+                        onLogout();
+                        setIsOpen(false);
+                      }}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </Button>
+                  </div>
                 </nav>
               </div>
             </SheetContent>

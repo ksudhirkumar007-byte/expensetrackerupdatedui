@@ -14,25 +14,34 @@ export function useCategories() {
   } = useQuery<Category[]>({
     queryKey: ["categories"],
     queryFn: async () => {
-      // Try to get from offline storage first
+      // Always get local data first for immediate display
       const offlineCategories = offlineStorage.getCategories();
-      if (offlineCategories.length > 0) {
-        return offlineCategories;
-      }
-      
-      // If no offline data, try to fetch from API
+
+      // If online, fetch fresh data and update cache
       if (offlineStorage.isOnline()) {
         try {
+          console.log('Fetching fresh categories from API');
           const { data } = await categoryApi.getAll();
+          console.log('Fresh categories API data received:', data);
+          
+          // Merge server data with local pending changes
+          const pending = offlineStorage.getPendingSync();
+          const mergedData = [...data];
+          
+          // Add locally created categories that haven't synced yet
+          pending.categories.create.forEach(localCategory => {
+            mergedData.push(localCategory);
+          });
+          
+          // Update cache with server data only
           offlineStorage.saveCategories(data);
-          return data;
+          return mergedData;
         } catch (error) {
-          // If API fails, return empty array
-          return [];
+          console.error('Categories API failed, using cached data:', error);
         }
       }
       
-      return [];
+      return offlineCategories;
     },
   });
 

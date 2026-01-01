@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useExpenses } from "../hooks/use-expenses";
 import { useCategories } from "../hooks/use-categories";
 import { useSync } from "../hooks/use-sync";
+import { useAuth } from "../hooks/use-auth";
 import { ExpenseStats } from "../components/expense/ExpenseStats";
 import { BudgetProgress } from "../components/expense/BudgetProgress";
 import { ExpenseFilters } from "../components/expense/ExpenseFilters";
@@ -21,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import { PlusCircle, Loader2, Filter, ChevronDown, ChevronUp } from "lucide-react";
+import { PlusCircle, Loader2, Filter, ChevronDown, ChevronUp, LogOut, RefreshCw } from "lucide-react";
 import { CategoryStats } from "../types/expense";
 
 export default function ExpenseTracker() {
@@ -40,6 +41,7 @@ export default function ExpenseTracker() {
     isSummarising,
   } = useCategories();
   const { sync, isSyncing, lastSync, hasPendingChanges, isOnline } = useSync();
+  const { logout, refresh, isRefreshing } = useAuth();
   
   const [showAddForm, setShowAddForm] = useState(false);
   const [currentTab, setCurrentTab] = useState("");
@@ -187,7 +189,6 @@ export default function ExpenseTracker() {
       {/* Mobile Header */}
       <div className="md:hidden">
         <MobileHeader
-         
           onAddExpense={() => setShowAddForm(true)}
           currentTab={currentTab}
           onTabChange={setCurrentTab}
@@ -196,6 +197,9 @@ export default function ExpenseTracker() {
           hasPendingChanges={hasPendingChanges()}
           isOnline={isOnline}
           lastSync={lastSync}
+          onLogout={logout}
+          onRefresh={refresh}
+          isRefreshing={isRefreshing}
         />
       </div>
 
@@ -214,16 +218,40 @@ export default function ExpenseTracker() {
             <p className="text-lg text-gray-600 dark:text-gray-300 font-medium max-w-2xl mx-auto leading-relaxed">
               Take control of your finances with intelligent spending insights
             </p>
-            {!showAddForm && (
+            <div className="flex items-center justify-center gap-4 mt-8">
+              {!showAddForm && (
+                <Button 
+                  onClick={() => setShowAddForm(true)} 
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                  size="lg"
+                >
+                  <PlusCircle className="h-5 w-5 mr-2" />
+                  Add New Expense
+                </Button>
+              )}
               <Button 
-                onClick={() => setShowAddForm(true)} 
-                className="mt-8 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                onClick={() => refresh()} 
+                disabled={isRefreshing}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-6 py-3 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
                 size="lg"
               >
-                <PlusCircle className="h-5 w-5 mr-2" />
-                Add New Expense
+                {isRefreshing ? (
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-5 w-5 mr-2" />
+                )}
+                Refresh
               </Button>
-            )}
+              <Button 
+                onClick={() => logout()} 
+                variant="outline"
+                className="border-2 border-red-200 hover:border-red-400 hover:bg-red-50 text-red-600 font-semibold px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                size="lg"
+              >
+                <LogOut className="h-5 w-5 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -340,7 +368,10 @@ export default function ExpenseTracker() {
                     <span className="text-base">📅</span>
                     Time Period
                   </label>
-                  <Select value={homeFilters.selectedMonth} onValueChange={(month: string) => setHomeFilters(prev => ({...prev, selectedMonth: month}))}>
+                  <Select value={homeFilters.selectedMonth} onValueChange={(month: string) => {
+                    setHomeFilters(prev => ({...prev, selectedMonth: month}));
+                    setSelectedMonth(month);
+                  }}>
                     <SelectTrigger className="w-full border-2 border-purple-200 focus:border-purple-500 rounded-xl bg-white/70 dark:bg-gray-700/70 font-medium h-12">
                       <SelectValue placeholder="Select Month" />
                     </SelectTrigger>
@@ -423,7 +454,10 @@ export default function ExpenseTracker() {
                         selectedMonth={expensesFilters.selectedMonth}
                         onCategoryChange={(value) => setExpensesFilters(prev => ({...prev, selectedCategory: value}))}
                         onTypeChange={(value) => setExpensesFilters(prev => ({...prev, selectedType: value}))}
-                        onMonthChange={(value) => setExpensesFilters(prev => ({...prev, selectedMonth: value}))}
+                        onMonthChange={(value) => {
+                          setExpensesFilters(prev => ({...prev, selectedMonth: value}));
+                          setSelectedMonth(value);
+                        }}
                       />
                     </div>
                   )}
@@ -479,7 +513,10 @@ export default function ExpenseTracker() {
                         
                         <div>
                           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">📅 Time Period</label>
-                          <Select value={analyticsFilters.selectedMonth} onValueChange={(month: string) => setAnalyticsFilters(prev => ({...prev, selectedMonth: month}))}>
+                          <Select value={analyticsFilters.selectedMonth} onValueChange={(month: string) => {
+                            setAnalyticsFilters(prev => ({...prev, selectedMonth: month}));
+                            setSelectedMonth(month);
+                          }}>
                             <SelectTrigger className="w-full border border-gray-300 focus:border-green-400 rounded-lg">
                               <SelectValue placeholder="Select Month" />
                             </SelectTrigger>
@@ -640,7 +677,10 @@ export default function ExpenseTracker() {
                       selectedMonth={expensesFilters.selectedMonth}
                       onCategoryChange={(value) => setExpensesFilters(prev => ({...prev, selectedCategory: value}))}
                       onTypeChange={(value) => setExpensesFilters(prev => ({...prev, selectedType: value}))}
-                      onMonthChange={(value) => setExpensesFilters(prev => ({...prev, selectedMonth: value}))}
+                      onMonthChange={(value) => {
+                        setExpensesFilters(prev => ({...prev, selectedMonth: value}));
+                        setSelectedMonth(value);
+                      }}
                     />
                   </div>
                 )}
@@ -697,7 +737,10 @@ export default function ExpenseTracker() {
                     
                     <div>
                       <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">📅 Time Period</label>
-                      <Select value={analyticsFilters.selectedMonth} onValueChange={(month: string) => setAnalyticsFilters(prev => ({...prev, selectedMonth: month}))}>
+                      <Select value={analyticsFilters.selectedMonth} onValueChange={(month: string) => {
+                        setAnalyticsFilters(prev => ({...prev, selectedMonth: month}));
+                        setSelectedMonth(month);
+                      }}>
                         <SelectTrigger className="w-full border border-gray-300 focus:border-green-400 rounded-lg h-10">
                           <SelectValue placeholder="Select Month" />
                         </SelectTrigger>

@@ -1,7 +1,16 @@
 import axios from "axios";
+import { authStorage } from "./auth";
 
-const API_BASE_URL = "http://65.2.70.189:8080/api";
-const CATEGORYAPI_BASE_URL = "http://65.2.70.189:8081/api";
+const API_BASE_URL = "http://xpenss.in/api";
+const CATEGORYAPI_BASE_URL = "http://xpenss.in/api";
+const AUTH_BASE_URL = "http://xpenss.in/auth";
+
+export const authapi = axios.create({
+  baseURL: AUTH_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 export const expenseapi = axios.create({
   baseURL: API_BASE_URL,
@@ -9,12 +18,29 @@ export const expenseapi = axios.create({
     "Content-Type": "application/json",
   },
 });
+
 export const categoryapi = axios.create({
   baseURL: CATEGORYAPI_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+// Add auth interceptors
+[expenseapi, categoryapi].forEach(api => {
+  api.interceptors.request.use((config) => {
+    const token = authStorage.getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
+});
+
+export const authApi = {
+  login: (email: string, passwordHash: string) => authapi.post("/login", { email, passwordHash }),
+  refresh: (refreshToken: string) => authapi.post("/refresh", { refreshToken }),
+};
 
 export const expenseApi = {
   getAll: (month?: string) => {

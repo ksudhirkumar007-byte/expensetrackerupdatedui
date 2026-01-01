@@ -14,27 +14,39 @@ export function useExpenses(month?: string) {
   } = useQuery<Expense[]>({
     queryKey: ["expenses", month],
     queryFn: async () => {
-      // Try to get from offline storage first
+      // Always get local data first for immediate display
       const offlineExpenses = offlineStorage.getExpenses();
-      if (offlineExpenses.length > 0) {
-        return offlineExpenses.filter(expense => 
-          !month || expense.month === month
-        );
-      }
-      
-      // If no offline data, try to fetch from API
+      const filteredOffline = offlineExpenses.filter(expense => 
+        !month || expense.month === month
+      );
+
+      // If online, fetch fresh data and update cache
       if (offlineStorage.isOnline()) {
         try {
+          console.log('Fetching fresh data from API for month:', month);
           const { data } = await expenseApi.getAll(month);
+          console.log('Fresh API data received:', data);
+          
+          // Merge server data with local pending changes
+          const pending = offlineStorage.getPendingSync();
+          const mergedData = [...data];
+          
+          // Add locally created expenses that haven't synced yet
+          pending.expenses.create.forEach(localExpense => {
+            if (!month || localExpense.month === month) {
+              mergedData.push(localExpense);
+            }
+          });
+          
+          // Update cache with server data only
           offlineStorage.saveExpenses(data);
-          return data;
+          return mergedData;
         } catch (error) {
-          // If API fails, return empty array
-          return [];
+          console.error('API failed, using cached data:', error);
         }
       }
       
-      return [];
+      return filteredOffline;
     },
   });
 
@@ -47,14 +59,16 @@ export function useExpenses(month?: string) {
       // Try to sync immediately if online
       if (offlineStorage.isOnline()) {
         try {
-          await expenseApi.create(newExpense);
+          console.log('Making API call to create expense:', newExpense);
+          const response = await expenseApi.create(newExpense);
+          console.log('Create expense API response:', response);
           // If successful, remove from pending sync
           const pending = offlineStorage.getPendingSync();
           pending.expenses.create = pending.expenses.create.filter(e => e.id !== newExpense.id);
           localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(pending));
         } catch (error) {
           // Keep in pending sync for later
-          console.log('Failed to sync, will retry later');
+          console.error('Failed to sync expense creation, will retry later:', error);
         }
       }
 
