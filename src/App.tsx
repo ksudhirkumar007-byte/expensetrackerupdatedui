@@ -9,7 +9,16 @@ import LoginPage from "./pages/LoginPage";
 import HistoricalAnalytics from "./components/expense/HistoricalAnalytics";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+      refetchOnReconnect: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 const App = () => {
   const isAuthenticated = authStorage.isAuthenticated();
