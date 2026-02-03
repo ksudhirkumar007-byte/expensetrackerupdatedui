@@ -40,6 +40,9 @@ export const categoryapi = axios.create({
 export const authApi = {
   login: (email: string, passwordHash: string) => authapi.post("/login", { email, passwordHash }),
   refresh: (refreshToken: string) => authapi.post("/refresh", { refreshToken }),
+  // Register a new user. Accepts an object with at least `email` and `password`.
+  // Backend may accept additional fields like `name` — pass them through.
+  signup: (data: { email: string; password: string; name?: string }) => authapi.post("/register", data),
 };
 
 export const expenseApi = {

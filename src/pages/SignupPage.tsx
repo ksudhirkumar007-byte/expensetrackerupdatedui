@@ -1,19 +1,23 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/use-auth";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Loader2, Mail, Lock } from "lucide-react";
+import { Link } from "react-router-dom";
 
-export default function LoginPage() {
+export default function SignupPage() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [passwordHash, setPasswordHash] = useState("");
-  const { login, isLoading } = useAuth();
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const { signup, isSigningUp } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && passwordHash) {
-      login({ email, passwordHash });
+    if (email && password) {
+      // navigate back to login on successful signup
+      signup({ email, password, name }, { onSuccess: () => navigate("/") });
     }
   };
 
@@ -26,16 +30,24 @@ export default function LoginPage() {
               <span className="text-white font-bold text-2xl">💰</span>
             </div>
             <h1 className="text-3xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Expense Tracker
+              Create Account
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">Sign in to your account</p>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">Sign up to start tracking expenses</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Email
-              </label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name</label>
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name (optional)"
+                className="h-12"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
@@ -50,15 +62,13 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Password
-              </label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
                   type="password"
-                  value={passwordHash}
-                  onChange={(e) => setPasswordHash(e.target.value)}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   className="pl-10 h-12"
                   required
@@ -68,22 +78,23 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              disabled={isLoading || !email || !passwordHash}
+              disabled={isSigningUp || !email || !password}
               className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg"
             >
-              {isLoading ? (
+              {isSigningUp ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
+                  Creating account...
                 </>
               ) : (
-                "Sign In"
+                "Create Account"
               )}
             </Button>
+
+            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+              Already have an account? <Link to="/" className="text-primary font-semibold">Sign in</Link>
+            </p>
           </form>
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
-            New here? <Link to="/signup" className="text-primary font-semibold">Create an account</Link>
-          </p>
         </div>
       </div>
     </div>

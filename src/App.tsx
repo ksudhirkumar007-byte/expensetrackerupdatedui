@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { authStorage } from "./lib/auth";
 import ExpenseTracker from "./pages/ExpenseTracker";
 import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 import HistoricalAnalytics from "./components/expense/HistoricalAnalytics";
 import NotFound from "./pages/NotFound";
 
@@ -36,7 +37,10 @@ const App = () => {
                 <Route path="/historical" element={<HistoricalAnalytics />} />
               </>
             ) : (
-              <Route path="*" element={<LoginPage />} />
+              <>
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="*" element={<LoginPage />} />
+              </>
             )}
             <Route path="*" element={<NotFound />} />
           </Routes>

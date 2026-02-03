@@ -53,7 +53,7 @@ export function CategoryList({
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const year = prevMonth.getFullYear().toString().slice(-2);
-    return `${monthNames[prevMonth.getMonth()]}-${year}`;
+    return `${monthNames[prevMonth.getMonth()]} ${year}`;
   };
 
   const handleSummariseAndUpdate = () => {

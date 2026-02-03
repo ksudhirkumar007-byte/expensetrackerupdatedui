@@ -36,6 +36,22 @@ export function useAuth() {
     },
   });
 
+  const signupMutation = useMutation({
+    mutationFn: async ({ email, password, name }: { email: string; password: string; name?: string }) => {
+      const response = await authApi.signup({ email, password, name });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      console.log("Signup successful, storing tokens."+data.accessToken+" and "+data.refreshToken);
+      authStorage.setTokens(data.accessToken, data.refreshToken);
+      toast.success("Account created and logged in!");
+      window.location.reload();
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Signup failed");
+    },
+  });
+
   const logout = () => {
     authStorage.clearTokens();
     toast.success("Logged out successfully!");
@@ -44,6 +60,8 @@ export function useAuth() {
 
   return {
     login: loginMutation.mutate,
+    signup: signupMutation.mutate,
+    isSigningUp: signupMutation.isPending,
     refresh: refreshMutation.mutate,
     logout,
     isLoading: loginMutation.isPending,
